@@ -207,3 +207,144 @@ function updateProgress(sectionId) {
     if (fill) fill.style.width = pct + '%';
     if (text) text.textContent = `${correct} / ${total} correct`;
 }
+
+/* ===== UNLIMITED PRACTICE MODE ===== */
+const unlimitedState = {};
+
+function nextUnlimited(sectionId) {
+    if (typeof SentenceGenerator === 'undefined') return;
+    const exercise = SentenceGenerator.getExercise(sectionId);
+    if (!exercise) return;
+
+    // Store current exercise
+    unlimitedState[sectionId] = {
+        exercise: exercise,
+        answered: false,
+        correct: unlimitedState[sectionId] ? unlimitedState[sectionId].correct : 0,
+        wrong: unlimitedState[sectionId] ? unlimitedState[sectionId].wrong : 0,
+        total: unlimitedState[sectionId] ? unlimitedState[sectionId].total : 0,
+    };
+
+    // Update prompt
+    document.getElementById('uPrompt-' + sectionId).textContent = exercise.prompt;
+
+    // Clear feedback
+    const feedback = document.getElementById('uFeedback-' + sectionId);
+    feedback.textContent = '';
+    feedback.className = 'exercise-feedback';
+
+    // Clear input
+    document.getElementById('uInput-' + sectionId).value = '';
+
+    // Hide hint
+    document.getElementById('uHint-' + sectionId).style.display = 'none';
+    document.getElementById('uHint-' + sectionId).textContent = exercise.hint;
+
+    // Build word bank
+    const bank = document.getElementById('uBank-' + sectionId);
+    bank.innerHTML = '';
+    exercise.words.forEach(function(word) {
+        const btn = document.createElement('button');
+        btn.className = 'word-tile';
+        btn.textContent = word;
+        btn.onclick = function() { selectUnlimitedWord(btn, sectionId); };
+        bank.appendChild(btn);
+    });
+
+    // Clear answer area
+    const answerArea = document.getElementById('uAnswer-' + sectionId);
+    answerArea.innerHTML = '<span class="answer-placeholder">Click words above to build your sentence...</span>';
+
+    // Reset card style
+    const card = document.getElementById('uCard-' + sectionId);
+    card.classList.remove('correct', 'incorrect');
+}
+
+function selectUnlimitedWord(tile, sectionId) {
+    const answerArea = document.getElementById('uAnswer-' + sectionId);
+    const placeholder = answerArea.querySelector('.answer-placeholder');
+    if (placeholder) placeholder.remove();
+
+    tile.classList.add('used');
+    const answerTile = document.createElement('button');
+    answerTile.className = 'word-tile';
+    answerTile.textContent = tile.textContent;
+    answerTile.onclick = function() {
+        tile.classList.remove('used');
+        answerTile.remove();
+        if (!answerArea.querySelector('.word-tile')) {
+            const ph = document.createElement('span');
+            ph.className = 'answer-placeholder';
+            ph.textContent = 'Click words above to build your sentence...';
+            answerArea.appendChild(ph);
+        }
+    };
+    answerArea.appendChild(answerTile);
+}
+
+function checkUnlimited(sectionId) {
+    const state = unlimitedState[sectionId];
+    if (!state || !state.exercise || state.answered) return;
+
+    const input = document.getElementById('uInput-' + sectionId);
+    const answerArea = document.getElementById('uAnswer-' + sectionId);
+    const feedback = document.getElementById('uFeedback-' + sectionId);
+    const card = document.getElementById('uCard-' + sectionId);
+
+    // Get user answer from typed input or word bank
+    let userAnswer = input.value.trim();
+    if (!userAnswer) {
+        const tiles = answerArea.querySelectorAll('.word-tile');
+        userAnswer = Array.from(tiles).map(t => t.textContent.trim()).join(' ');
+    }
+    if (!userAnswer) {
+        feedback.textContent = 'Please build or type a sentence first.';
+        feedback.className = 'exercise-feedback incorrect';
+        return;
+    }
+
+    const clean = s => s.replace(/[.!?,]/g, '').trim().toLowerCase();
+    const isCorrect = clean(userAnswer) === clean(state.exercise.answer);
+
+    state.answered = true;
+    state.total++;
+
+    if (isCorrect) {
+        state.correct++;
+        feedback.textContent = '✅ Richtig! (Correct!)';
+        feedback.className = 'exercise-feedback correct';
+        card.classList.add('correct');
+    } else {
+        state.wrong++;
+        feedback.innerHTML = '❌ Not quite. Expected: <strong>' + state.exercise.answer + '</strong>';
+        feedback.className = 'exercise-feedback incorrect';
+        card.classList.add('incorrect');
+    }
+
+    // Update stats
+    document.getElementById('uCorrect-' + sectionId).textContent = '✅ ' + state.correct;
+    document.getElementById('uWrong-' + sectionId).textContent = '❌ ' + state.wrong;
+    document.getElementById('uTotal-' + sectionId).textContent = '📝 ' + state.total + ' practiced';
+
+    // Update progress bar
+    const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0;
+    const fill = document.getElementById('uProgress-' + sectionId);
+    const scoreText = document.getElementById('uScoreText-' + sectionId);
+    if (fill) fill.style.width = pct + '%';
+    if (scoreText) scoreText.textContent = state.correct + ' / ' + state.total + ' correct (' + pct + '%)';
+}
+
+function revealUnlimited(sectionId) {
+    const state = unlimitedState[sectionId];
+    if (!state || !state.exercise) return;
+    const feedback = document.getElementById('uFeedback-' + sectionId);
+    feedback.innerHTML = '💡 Answer: <strong>' + state.exercise.answer + '</strong>';
+    feedback.className = 'exercise-feedback';
+    feedback.style.background = '#eff6ff';
+    feedback.style.color = '#1a56db';
+}
+
+function toggleUnlimitedHint(sectionId) {
+    const hint = document.getElementById('uHint-' + sectionId);
+    hint.style.display = hint.style.display === 'none' ? 'inline-block' : 'none';
+}

@@ -41,77 +41,82 @@
         <p>{{ sec.explanation }}</p>
     </div>
 
-    <!-- Exercises -->
-    <div class="exercises-container" id="exercises-{{ sec.id }}">
-        {% for ex in sec.exercises %}
-        {% set ex_idx = loop.index0 %}
-        <div class="exercise-card" id="ex-{{ sec.id }}-{{ ex_idx }}">
-            <div class="exercise-number">{{ loop.index }} / {{ sec.exercises|length }}</div>
+    <!-- ♾️ UNLIMITED PRACTICE MODE -->
+    <div class="unlimited-practice" id="unlimited-{{ sec.id }}">
+        <div class="unlimited-header">
+            <h3>♾️ Unlimited Practice</h3>
+            <div class="unlimited-stats">
+                <span class="stat-badge correct-badge" id="uCorrect-{{ sec.id }}">✅ 0</span>
+                <span class="stat-badge wrong-badge" id="uWrong-{{ sec.id }}">❌ 0</span>
+                <span class="stat-badge total-badge" id="uTotal-{{ sec.id }}">📝 0 practiced</span>
+            </div>
+        </div>
+
+        <div class="unlimited-card" id="uCard-{{ sec.id }}">
             <div class="exercise-prompt">
                 <span class="prompt-label">Translate to German:</span>
-                <span class="prompt-text">{{ ex.prompt }}</span>
+                <span class="prompt-text" id="uPrompt-{{ sec.id }}">Click "Next Sentence" to begin!</span>
             </div>
 
-            <!-- Word bank (drag/click to build) -->
-            <div class="word-bank" id="bank-{{ sec.id }}-{{ ex_idx }}">
-                {% for w in ex.words %}
-                <button class="word-tile" onclick="selectWord(this, '{{ sec.id }}', {{ ex_idx }})">{{ w }}</button>
-                {% endfor %}
-            </div>
+            <!-- Word bank -->
+            <div class="word-bank" id="uBank-{{ sec.id }}"></div>
 
             <!-- Answer area -->
-            <div class="answer-area" id="answer-{{ sec.id }}-{{ ex_idx }}">
+            <div class="answer-area" id="uAnswer-{{ sec.id }}">
                 <span class="answer-placeholder">Click words above to build your sentence...</span>
             </div>
 
-            <!-- Or type it -->
+            <!-- Type answer -->
             <div class="type-answer">
                 <span class="or-divider">— or type your answer —</span>
-                <input type="text" class="sentence-input" 
-                       id="input-{{ sec.id }}-{{ ex_idx }}" 
+                <input type="text" class="sentence-input" id="uInput-{{ sec.id }}"
                        placeholder="Type the German sentence..."
-                       data-correct="{{ ex.answer }}"
-                       onkeypress="if(event.key==='Enter') checkSentence('{{ sec.id }}', {{ ex_idx }})">
+                       onkeypress="if(event.key==='Enter') checkUnlimited('{{ sec.id }}')">
             </div>
 
             <!-- Hint -->
             <div class="hint-section">
-                <button class="btn btn-sm hint-btn" onclick="showHint('{{ sec.id }}', {{ ex_idx }})">
-                    💡 Show Hint
-                </button>
-                <span class="hint-text" id="hint-{{ sec.id }}-{{ ex_idx }}" style="display:none;">
-                    {{ ex.hint }}
-                </span>
+                <button class="btn btn-sm hint-btn" onclick="toggleUnlimitedHint('{{ sec.id }}')">💡 Show Hint</button>
+                <span class="hint-text" id="uHint-{{ sec.id }}" style="display:none;"></span>
             </div>
 
-            <!-- Check & Feedback -->
+            <!-- Actions -->
             <div class="exercise-actions">
-                <button class="btn btn-primary" style="background: {{ level.color }};" 
-                        onclick="checkSentence('{{ sec.id }}', {{ ex_idx }})">
-                    Check Answer ✓
-                </button>
-                <button class="btn btn-sm" onclick="revealAnswer('{{ sec.id }}', {{ ex_idx }})">
-                    Reveal Answer
+                <button class="btn btn-primary" style="background: {{ level.color }};"
+                        onclick="checkUnlimited('{{ sec.id }}')">Check Answer ✓</button>
+                <button class="btn btn-sm" onclick="revealUnlimited('{{ sec.id }}')">Reveal Answer</button>
+                <button class="btn btn-sm btn-next" onclick="nextUnlimited('{{ sec.id }}')" id="uNextBtn-{{ sec.id }}">
+                    Next Sentence →
                 </button>
             </div>
-            <div class="exercise-feedback" id="feedback-{{ sec.id }}-{{ ex_idx }}"></div>
+            <div class="exercise-feedback" id="uFeedback-{{ sec.id }}"></div>
         </div>
-        {% endfor %}
+
+        <!-- Progress bar -->
+        <div class="section-score">
+            <span class="score-label">Session Progress:</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="uProgress-{{ sec.id }}" style="width: 0%; background: {{ level.color }};"></div>
+            </div>
+            <span class="score-text" id="uScoreText-{{ sec.id }}">Start practicing to track your score!</span>
+        </div>
     </div>
 
-    <!-- Section score -->
-    <div class="section-score" id="score-{{ sec.id }}">
-        <span class="score-label">Section Progress:</span>
-        <div class="progress-bar">
-            <div class="progress-fill" id="progress-{{ sec.id }}" style="width: 0%; background: {{ level.color }};"></div>
-        </div>
-        <span class="score-text" id="scoreText-{{ sec.id }}">0 / {{ sec.exercises|length }} correct</span>
-    </div>
 </div>
 {% endfor %}
 
 <!-- Data for JS -->
 <script>
     const sentenceData = {{ level.sentence_sections | tojson }};
+    const levelColor = "{{ level.color }}";
+</script>
+<script src="{{ url_for('static', filename='js/generator.js') }}"></script>
+<script>
+    // Initialize unlimited practice for each section on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        sentenceData.forEach(function(sec) {
+            nextUnlimited(sec.id);
+        });
+    });
 </script>
 {% endblock %}
