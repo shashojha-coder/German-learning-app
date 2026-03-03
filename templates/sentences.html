@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}{{ level.name }} – Sentence Making{% endblock %}
+
+{% block content %}
+<div class="page-header" style="--level-color: {{ level.color }};">
+    <div class="breadcrumb">
+        <a href="/">Roadmap</a> › <span>Sentence Making</span> › <span>{{ level.id|upper }}</span>
+    </div>
+    <h1>✍️ {{ level.name }} – Sentence Making</h1>
+    <p>{{ level.description }}</p>
+
+    <div class="level-nav">
+        {% for l in all_levels %}
+        <a href="/sentences/{{ l.id }}" 
+           class="level-nav-btn {% if l.id == level.id %}active{% endif %}"
+           style="{% if l.id == level.id %}background: {{ l.color }}; color: #fff;{% endif %}">
+            {{ l.id|upper }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Section tabs -->
+<div class="section-tabs">
+    {% for sec in level.sentence_sections %}
+    <button class="tab-btn {% if loop.first %}active{% endif %}" 
+            onclick="switchTab('{{ sec.id }}', this)"
+            style="--tab-color: {{ level.color }};">
+        {{ sec.title }}
+    </button>
+    {% endfor %}
+</div>
+
+<!-- Sentence sections -->
+{% for sec in level.sentence_sections %}
+<div class="sentence-section tab-content {% if loop.first %}active{% endif %}" id="tab-{{ sec.id }}">
+    
+    <!-- Grammar explanation -->
+    <div class="grammar-box" style="border-left-color: {{ level.color }};">
+        <h3>📖 Grammar Guide: {{ sec.title }}</h3>
+        <p>{{ sec.explanation }}</p>
+    </div>
+
+    <!-- Exercises -->
+    <div class="exercises-container" id="exercises-{{ sec.id }}">
+        {% for ex in sec.exercises %}
+        <div class="exercise-card" id="ex-{{ sec.id }}-{{ loop.index0 }}">
+            <div class="exercise-number">{{ loop.index }} / {{ sec.exercises|length }}</div>
+            <div class="exercise-prompt">
+                <span class="prompt-label">Translate to German:</span>
+                <span class="prompt-text">{{ ex.prompt }}</span>
+            </div>
+
+            <!-- Word bank (drag/click to build) -->
+            <div class="word-bank" id="bank-{{ sec.id }}-{{ loop.index0 }}">
+                {% for w in ex.words %}
+                <button class="word-tile" onclick="selectWord(this, '{{ sec.id }}', {{ loop.index0 }})">{{ w }}</button>
+                {% endfor %}
+            </div>
+
+            <!-- Answer area -->
+            <div class="answer-area" id="answer-{{ sec.id }}-{{ loop.index0 }}">
+                <span class="answer-placeholder">Click words above to build your sentence...</span>
+            </div>
+
+            <!-- Or type it -->
+            <div class="type-answer">
+                <span class="or-divider">— or type your answer —</span>
+                <input type="text" class="sentence-input" 
+                       id="input-{{ sec.id }}-{{ loop.index0 }}" 
+                       placeholder="Type the German sentence..."
+                       data-correct="{{ ex.answer }}"
+                       onkeypress="if(event.key==='Enter') checkSentence('{{ sec.id }}', {{ loop.index0 }})">
+            </div>
+
+            <!-- Hint -->
+            <div class="hint-section">
+                <button class="btn btn-sm hint-btn" onclick="showHint('{{ sec.id }}', {{ loop.index0 }})">
+                    💡 Show Hint
+                </button>
+                <span class="hint-text" id="hint-{{ sec.id }}-{{ loop.index0 }}" style="display:none;">
+                    {{ ex.hint }}
+                </span>
+            </div>
+
+            <!-- Check & Feedback -->
+            <div class="exercise-actions">
+                <button class="btn btn-primary" style="background: {{ level.color }};" 
+                        onclick="checkSentence('{{ sec.id }}', {{ loop.index0 }})">
+                    Check Answer ✓
+                </button>
+                <button class="btn btn-sm" onclick="revealAnswer('{{ sec.id }}', {{ loop.index0 }})">
+                    Reveal Answer
+                </button>
+            </div>
+            <div class="exercise-feedback" id="feedback-{{ sec.id }}-{{ loop.index0 }}"></div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Section score -->
+    <div class="section-score" id="score-{{ sec.id }}">
+        <span class="score-label">Section Progress:</span>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-{{ sec.id }}" style="width: 0%; background: {{ level.color }};"></div>
+        </div>
+        <span class="score-text" id="scoreText-{{ sec.id }}">0 / {{ sec.exercises|length }} correct</span>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Data for JS -->
+<script>
+    const sentenceData = {{ level.sentence_sections | tojson }};
+</script>
+{% endblock %}

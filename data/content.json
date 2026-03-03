@@ -1,0 +1,508 @@
+{
+  "levels": [
+    {
+      "id": "a1",
+      "name": "A1 – Beginner",
+      "color": "#4CAF50",
+      "description": "Start with the basics: greetings, numbers, simple everyday words and very simple sentence patterns.",
+      "vocab_sections": [
+        {
+          "id": "greetings",
+          "title": "Greetings & Introductions",
+          "words": [
+            {"de": "Hallo", "en": "Hello", "example": "Hallo, wie geht's?"},
+            {"de": "Guten Morgen", "en": "Good morning", "example": "Guten Morgen, Herr Müller!"},
+            {"de": "Guten Tag", "en": "Good day", "example": "Guten Tag! Wie kann ich Ihnen helfen?"},
+            {"de": "Guten Abend", "en": "Good evening", "example": "Guten Abend, willkommen!"},
+            {"de": "Auf Wiedersehen", "en": "Goodbye", "example": "Auf Wiedersehen! Bis morgen!"},
+            {"de": "Tschüss", "en": "Bye (informal)", "example": "Tschüss, bis später!"},
+            {"de": "Bitte", "en": "Please / You're welcome", "example": "Einen Kaffee, bitte."},
+            {"de": "Danke", "en": "Thank you", "example": "Danke für die Hilfe!"},
+            {"de": "Ja", "en": "Yes", "example": "Ja, ich verstehe."},
+            {"de": "Nein", "en": "No", "example": "Nein, danke."},
+            {"de": "Entschuldigung", "en": "Excuse me / Sorry", "example": "Entschuldigung, wo ist der Bahnhof?"},
+            {"de": "Wie heißen Sie?", "en": "What is your name? (formal)", "example": "Wie heißen Sie? – Ich heiße Anna."}
+          ]
+        },
+        {
+          "id": "numbers",
+          "title": "Numbers (1–20)",
+          "words": [
+            {"de": "eins", "en": "one", "example": "Ich habe eins."},
+            {"de": "zwei", "en": "two", "example": "Zwei Kaffee, bitte."},
+            {"de": "drei", "en": "three", "example": "Drei Kinder spielen."},
+            {"de": "vier", "en": "four", "example": "Es ist vier Uhr."},
+            {"de": "fünf", "en": "five", "example": "Fünf Minuten noch."},
+            {"de": "sechs", "en": "six", "example": "Sechs Äpfel kosten zwei Euro."},
+            {"de": "sieben", "en": "seven", "example": "Sieben Tage hat die Woche."},
+            {"de": "acht", "en": "eight", "example": "Er ist acht Jahre alt."},
+            {"de": "neun", "en": "nine", "example": "Neun Uhr ist Frühstück."},
+            {"de": "zehn", "en": "ten", "example": "Zehn Euro, bitte."},
+            {"de": "elf", "en": "eleven", "example": "Elf Freunde spielen Fußball."},
+            {"de": "zwölf", "en": "twelve", "example": "Um zwölf Uhr ist Mittag."}
+          ]
+        },
+        {
+          "id": "everyday_objects",
+          "title": "Everyday Objects",
+          "words": [
+            {"de": "der Tisch", "en": "the table", "example": "Der Tisch ist groß."},
+            {"de": "der Stuhl", "en": "the chair", "example": "Der Stuhl ist bequem."},
+            {"de": "das Buch", "en": "the book", "example": "Das Buch ist interessant."},
+            {"de": "das Wasser", "en": "the water", "example": "Das Wasser ist kalt."},
+            {"de": "das Brot", "en": "the bread", "example": "Das Brot ist frisch."},
+            {"de": "die Tasse", "en": "the cup", "example": "Die Tasse ist voll."},
+            {"de": "das Telefon", "en": "the phone", "example": "Das Telefon klingelt."},
+            {"de": "die Uhr", "en": "the clock/watch", "example": "Die Uhr zeigt drei."},
+            {"de": "der Schlüssel", "en": "the key", "example": "Wo ist der Schlüssel?"},
+            {"de": "die Tasche", "en": "the bag", "example": "Die Tasche ist schwer."}
+          ]
+        },
+        {
+          "id": "food_drink",
+          "title": "Food & Drinks",
+          "words": [
+            {"de": "der Kaffee", "en": "coffee", "example": "Ich trinke Kaffee."},
+            {"de": "der Tee", "en": "tea", "example": "Möchtest du Tee?"},
+            {"de": "die Milch", "en": "milk", "example": "Die Milch ist frisch."},
+            {"de": "der Apfel", "en": "apple", "example": "Der Apfel ist rot."},
+            {"de": "die Banane", "en": "banana", "example": "Ich esse eine Banane."},
+            {"de": "das Ei", "en": "egg", "example": "Das Ei ist gekocht."},
+            {"de": "das Fleisch", "en": "meat", "example": "Ich esse kein Fleisch."},
+            {"de": "der Käse", "en": "cheese", "example": "Der Käse schmeckt gut."},
+            {"de": "die Suppe", "en": "soup", "example": "Die Suppe ist heiß."},
+            {"de": "der Kuchen", "en": "cake", "example": "Der Kuchen ist lecker."}
+          ]
+        },
+        {
+          "id": "colors",
+          "title": "Colors",
+          "words": [
+            {"de": "rot", "en": "red", "example": "Das Auto ist rot."},
+            {"de": "blau", "en": "blue", "example": "Der Himmel ist blau."},
+            {"de": "grün", "en": "green", "example": "Das Gras ist grün."},
+            {"de": "gelb", "en": "yellow", "example": "Die Sonne ist gelb."},
+            {"de": "schwarz", "en": "black", "example": "Die Katze ist schwarz."},
+            {"de": "weiß", "en": "white", "example": "Der Schnee ist weiß."},
+            {"de": "braun", "en": "brown", "example": "Der Hund ist braun."},
+            {"de": "grau", "en": "grey", "example": "Der Himmel ist grau."}
+          ]
+        },
+        {
+          "id": "family",
+          "title": "Family Members",
+          "words": [
+            {"de": "die Mutter", "en": "mother", "example": "Meine Mutter kocht gern."},
+            {"de": "der Vater", "en": "father", "example": "Mein Vater arbeitet viel."},
+            {"de": "die Schwester", "en": "sister", "example": "Meine Schwester ist jünger."},
+            {"de": "der Bruder", "en": "brother", "example": "Mein Bruder spielt Fußball."},
+            {"de": "die Großmutter", "en": "grandmother", "example": "Meine Großmutter ist nett."},
+            {"de": "der Großvater", "en": "grandfather", "example": "Mein Großvater liest gern."},
+            {"de": "das Kind", "en": "child", "example": "Das Kind spielt draußen."},
+            {"de": "die Eltern", "en": "parents", "example": "Meine Eltern wohnen in Berlin."}
+          ]
+        }
+      ],
+      "sentence_sections": [
+        {
+          "id": "basic_word_order",
+          "title": "Basic Word Order (Subject-Verb-Object)",
+          "explanation": "In German, the basic sentence order is Subject + Verb + Object. The verb always takes the second position in main clauses.",
+          "exercises": [
+            {"prompt": "I drink coffee.", "answer": "Ich trinke Kaffee.", "hint": "trinken → ich trinke", "words": ["Ich", "trinke", "Kaffee"]},
+            {"prompt": "She reads a book.", "answer": "Sie liest ein Buch.", "hint": "lesen → sie liest", "words": ["Sie", "liest", "ein", "Buch"]},
+            {"prompt": "He plays football.", "answer": "Er spielt Fußball.", "hint": "spielen → er spielt", "words": ["Er", "spielt", "Fußball"]},
+            {"prompt": "We eat bread.", "answer": "Wir essen Brot.", "hint": "essen → wir essen", "words": ["Wir", "essen", "Brot"]},
+            {"prompt": "You (informal) learn German.", "answer": "Du lernst Deutsch.", "hint": "lernen → du lernst", "words": ["Du", "lernst", "Deutsch"]}
+          ]
+        },
+        {
+          "id": "simple_questions",
+          "title": "Simple Questions",
+          "explanation": "Yes/No questions start with the verb. W-questions (wer, was, wo, wie, wann) start with the question word, followed by verb.",
+          "exercises": [
+            {"prompt": "Do you speak German?", "answer": "Sprichst du Deutsch?", "hint": "Verb first for yes/no questions", "words": ["Sprichst", "du", "Deutsch"]},
+            {"prompt": "Where do you live?", "answer": "Wo wohnst du?", "hint": "W-word + verb + subject", "words": ["Wo", "wohnst", "du"]},
+            {"prompt": "What is your name?", "answer": "Wie heißt du?", "hint": "wie = how (used for names)", "words": ["Wie", "heißt", "du"]},
+            {"prompt": "Is he a student?", "answer": "Ist er Student?", "hint": "Verb first", "words": ["Ist", "er", "Student"]},
+            {"prompt": "When do you come?", "answer": "Wann kommst du?", "hint": "wann = when", "words": ["Wann", "kommst", "du"]}
+          ]
+        },
+        {
+          "id": "negation",
+          "title": "Negation with nicht / kein",
+          "explanation": "'nicht' negates verbs and adjectives. 'kein/keine' negates nouns (replaces ein/eine). Example: Ich habe kein Auto. / Ich laufe nicht.",
+          "exercises": [
+            {"prompt": "I don't have a car.", "answer": "Ich habe kein Auto.", "hint": "kein replaces ein for negation", "words": ["Ich", "habe", "kein", "Auto"]},
+            {"prompt": "She is not hungry.", "answer": "Sie ist nicht hungrig.", "hint": "nicht before adjectives", "words": ["Sie", "ist", "nicht", "hungrig"]},
+            {"prompt": "We don't drink milk.", "answer": "Wir trinken keine Milch.", "hint": "keine for feminine nouns", "words": ["Wir", "trinken", "keine", "Milch"]},
+            {"prompt": "He doesn't work today.", "answer": "Er arbeitet heute nicht.", "hint": "nicht at the end", "words": ["Er", "arbeitet", "heute", "nicht"]},
+            {"prompt": "I have no money.", "answer": "Ich habe kein Geld.", "hint": "kein for neuter nouns", "words": ["Ich", "habe", "kein", "Geld"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2",
+      "name": "A2 – Elementary",
+      "color": "#2196F3",
+      "description": "Expand your vocabulary for daily life, travel, and work. Learn past tense and more complex sentence structures.",
+      "vocab_sections": [
+        {
+          "id": "travel",
+          "title": "Travel & Directions",
+          "words": [
+            {"de": "der Bahnhof", "en": "train station", "example": "Der Bahnhof ist groß."},
+            {"de": "der Flughafen", "en": "airport", "example": "Wir fahren zum Flughafen."},
+            {"de": "die Haltestelle", "en": "bus/tram stop", "example": "Die Haltestelle ist dort."},
+            {"de": "die Fahrkarte", "en": "ticket", "example": "Ich brauche eine Fahrkarte."},
+            {"de": "links", "en": "left", "example": "Gehen Sie links."},
+            {"de": "rechts", "en": "right", "example": "Das Hotel ist rechts."},
+            {"de": "geradeaus", "en": "straight ahead", "example": "Gehen Sie geradeaus."},
+            {"de": "die Kreuzung", "en": "intersection", "example": "An der Kreuzung links."},
+            {"de": "das Hotel", "en": "hotel", "example": "Das Hotel ist teuer."},
+            {"de": "die Reise", "en": "trip/journey", "example": "Die Reise war wunderbar."},
+            {"de": "der Koffer", "en": "suitcase", "example": "Mein Koffer ist schwer."},
+            {"de": "die Landkarte", "en": "map", "example": "Hast du eine Landkarte?"}
+          ]
+        },
+        {
+          "id": "health",
+          "title": "Health & Body",
+          "words": [
+            {"de": "der Kopf", "en": "head", "example": "Mein Kopf tut weh."},
+            {"de": "der Arm", "en": "arm", "example": "Mein Arm ist gebrochen."},
+            {"de": "das Bein", "en": "leg", "example": "Das Bein schmerzt."},
+            {"de": "der Arzt", "en": "doctor", "example": "Ich gehe zum Arzt."},
+            {"de": "die Apotheke", "en": "pharmacy", "example": "Die Apotheke ist geschlossen."},
+            {"de": "das Krankenhaus", "en": "hospital", "example": "Er ist im Krankenhaus."},
+            {"de": "die Erkältung", "en": "cold (illness)", "example": "Ich habe eine Erkältung."},
+            {"de": "das Fieber", "en": "fever", "example": "Sie hat Fieber."},
+            {"de": "die Tablette", "en": "pill/tablet", "example": "Nehmen Sie diese Tablette."},
+            {"de": "gesund", "en": "healthy", "example": "Obst ist gesund."}
+          ]
+        },
+        {
+          "id": "work_daily",
+          "title": "Work & Daily Routine",
+          "words": [
+            {"de": "aufstehen", "en": "to get up", "example": "Ich stehe um sieben Uhr auf."},
+            {"de": "frühstücken", "en": "to have breakfast", "example": "Wir frühstücken um acht."},
+            {"de": "arbeiten", "en": "to work", "example": "Er arbeitet im Büro."},
+            {"de": "das Büro", "en": "office", "example": "Das Büro ist groß."},
+            {"de": "der Termin", "en": "appointment", "example": "Ich habe einen Termin um drei."},
+            {"de": "das Treffen", "en": "meeting", "example": "Das Treffen beginnt bald."},
+            {"de": "die Pause", "en": "break", "example": "Ich mache eine Pause."},
+            {"de": "der Feierabend", "en": "end of work/day", "example": "Nach Feierabend gehe ich joggen."},
+            {"de": "kochen", "en": "to cook", "example": "Ich koche jeden Abend."},
+            {"de": "einkaufen", "en": "to shop", "example": "Wir müssen einkaufen gehen."}
+          ]
+        },
+        {
+          "id": "weather",
+          "title": "Weather",
+          "words": [
+            {"de": "die Sonne", "en": "sun", "example": "Die Sonne scheint."},
+            {"de": "der Regen", "en": "rain", "example": "Der Regen hört nicht auf."},
+            {"de": "der Schnee", "en": "snow", "example": "Es gibt Schnee im Winter."},
+            {"de": "der Wind", "en": "wind", "example": "Der Wind ist stark."},
+            {"de": "warm", "en": "warm", "example": "Heute ist es warm."},
+            {"de": "kalt", "en": "cold", "example": "Im Winter ist es kalt."},
+            {"de": "das Gewitter", "en": "thunderstorm", "example": "Ein Gewitter kommt."},
+            {"de": "bewölkt", "en": "cloudy", "example": "Heute ist es bewölkt."}
+          ]
+        },
+        {
+          "id": "shopping",
+          "title": "Shopping & Money",
+          "words": [
+            {"de": "das Geschäft", "en": "shop/store", "example": "Das Geschäft ist offen."},
+            {"de": "der Preis", "en": "price", "example": "Was ist der Preis?"},
+            {"de": "billig", "en": "cheap", "example": "Das T-Shirt ist billig."},
+            {"de": "teuer", "en": "expensive", "example": "Das Kleid ist teuer."},
+            {"de": "bezahlen", "en": "to pay", "example": "Ich möchte bezahlen."},
+            {"de": "die Rechnung", "en": "bill/invoice", "example": "Die Rechnung, bitte."},
+            {"de": "das Angebot", "en": "offer/sale", "example": "Das Angebot ist gut."},
+            {"de": "die Kasse", "en": "cash register", "example": "Bitte gehen Sie zur Kasse."},
+            {"de": "der Rabatt", "en": "discount", "example": "Gibt es einen Rabatt?"},
+            {"de": "umtauschen", "en": "to exchange", "example": "Kann ich das umtauschen?"}
+          ]
+        }
+      ],
+      "sentence_sections": [
+        {
+          "id": "past_tense_perfekt",
+          "title": "Past Tense (Perfekt)",
+          "explanation": "The Perfekt tense uses haben/sein + past participle. Regular verbs: ge- + stem + -t (gemacht). Irregular verbs vary (gegessen, getrunken).",
+          "exercises": [
+            {"prompt": "I ate an apple.", "answer": "Ich habe einen Apfel gegessen.", "hint": "essen → gegessen (irregular)", "words": ["Ich", "habe", "einen", "Apfel", "gegessen"]},
+            {"prompt": "She travelled to Berlin.", "answer": "Sie ist nach Berlin gereist.", "hint": "reisen uses 'sein' (movement)", "words": ["Sie", "ist", "nach", "Berlin", "gereist"]},
+            {"prompt": "We bought a car.", "answer": "Wir haben ein Auto gekauft.", "hint": "kaufen → gekauft (regular)", "words": ["Wir", "haben", "ein", "Auto", "gekauft"]},
+            {"prompt": "He drank coffee.", "answer": "Er hat Kaffee getrunken.", "hint": "trinken → getrunken", "words": ["Er", "hat", "Kaffee", "getrunken"]},
+            {"prompt": "They went home.", "answer": "Sie sind nach Hause gegangen.", "hint": "gehen uses 'sein'", "words": ["Sie", "sind", "nach", "Hause", "gegangen"]}
+          ]
+        },
+        {
+          "id": "modal_verbs",
+          "title": "Modal Verbs (können, müssen, wollen, sollen, dürfen)",
+          "explanation": "Modal verbs modify the main verb. The main verb goes to the END of the sentence in infinitive form. Example: Ich kann Deutsch sprechen.",
+          "exercises": [
+            {"prompt": "I can speak German.", "answer": "Ich kann Deutsch sprechen.", "hint": "können → ich kann", "words": ["Ich", "kann", "Deutsch", "sprechen"]},
+            {"prompt": "You must go to the doctor.", "answer": "Du musst zum Arzt gehen.", "hint": "müssen → du musst", "words": ["Du", "musst", "zum", "Arzt", "gehen"]},
+            {"prompt": "She wants to travel.", "answer": "Sie will reisen.", "hint": "wollen → sie will", "words": ["Sie", "will", "reisen"]},
+            {"prompt": "We should study more.", "answer": "Wir sollen mehr lernen.", "hint": "sollen → wir sollen", "words": ["Wir", "sollen", "mehr", "lernen"]},
+            {"prompt": "May I sit here?", "answer": "Darf ich hier sitzen?", "hint": "dürfen → ich darf", "words": ["Darf", "ich", "hier", "sitzen"]}
+          ]
+        },
+        {
+          "id": "connectors_weil_dass",
+          "title": "Connectors: weil & dass",
+          "explanation": "After 'weil' (because) and 'dass' (that), the conjugated verb goes to the END of the clause. Example: Ich lerne Deutsch, weil ich in Berlin arbeite.",
+          "exercises": [
+            {"prompt": "I learn German because I work in Berlin.", "answer": "Ich lerne Deutsch, weil ich in Berlin arbeite.", "hint": "Verb at the end after weil", "words": ["Ich", "lerne", "Deutsch", "weil", "ich", "in", "Berlin", "arbeite"]},
+            {"prompt": "I think that he is nice.", "answer": "Ich denke, dass er nett ist.", "hint": "Verb at the end after dass", "words": ["Ich", "denke", "dass", "er", "nett", "ist"]},
+            {"prompt": "She stays home because she is sick.", "answer": "Sie bleibt zu Hause, weil sie krank ist.", "hint": "krank = sick, verb at end", "words": ["Sie", "bleibt", "zu", "Hause", "weil", "sie", "krank", "ist"]},
+            {"prompt": "I know that you speak German.", "answer": "Ich weiß, dass du Deutsch sprichst.", "hint": "wissen = to know", "words": ["Ich", "weiß", "dass", "du", "Deutsch", "sprichst"]},
+            {"prompt": "He is happy because he has vacation.", "answer": "Er ist glücklich, weil er Urlaub hat.", "hint": "Urlaub = vacation", "words": ["Er", "ist", "glücklich", "weil", "er", "Urlaub", "hat"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b1",
+      "name": "B1 – Intermediate",
+      "color": "#FF9800",
+      "description": "Handle everyday situations confidently. Learn abstract vocabulary, complex tenses, and subordinate clauses.",
+      "vocab_sections": [
+        {
+          "id": "emotions",
+          "title": "Emotions & Feelings",
+          "words": [
+            {"de": "die Freude", "en": "joy", "example": "Die Freude war groß."},
+            {"de": "die Angst", "en": "fear/anxiety", "example": "Er hat Angst vor Spinnen."},
+            {"de": "die Enttäuschung", "en": "disappointment", "example": "Die Enttäuschung war groß."},
+            {"de": "die Überraschung", "en": "surprise", "example": "Was für eine Überraschung!"},
+            {"de": "stolz", "en": "proud", "example": "Ich bin stolz auf dich."},
+            {"de": "eifersüchtig", "en": "jealous", "example": "Er ist eifersüchtig."},
+            {"de": "begeistert", "en": "enthusiastic", "example": "Sie ist begeistert von dem Film."},
+            {"de": "enttäuscht", "en": "disappointed", "example": "Ich bin enttäuscht."},
+            {"de": "aufgeregt", "en": "excited/nervous", "example": "Ich bin sehr aufgeregt."},
+            {"de": "zufrieden", "en": "content/satisfied", "example": "Sie ist zufrieden mit dem Ergebnis."}
+          ]
+        },
+        {
+          "id": "education",
+          "title": "Education & Career",
+          "words": [
+            {"de": "die Ausbildung", "en": "training/apprenticeship", "example": "Er macht eine Ausbildung."},
+            {"de": "das Studium", "en": "university studies", "example": "Das Studium dauert drei Jahre."},
+            {"de": "die Prüfung", "en": "exam", "example": "Die Prüfung war schwer."},
+            {"de": "das Zeugnis", "en": "certificate/report card", "example": "Mein Zeugnis ist gut."},
+            {"de": "die Bewerbung", "en": "application (job)", "example": "Ich schreibe eine Bewerbung."},
+            {"de": "das Vorstellungsgespräch", "en": "job interview", "example": "Das Vorstellungsgespräch ist morgen."},
+            {"de": "der Lebenslauf", "en": "CV/resume", "example": "Mein Lebenslauf ist aktuell."},
+            {"de": "das Gehalt", "en": "salary", "example": "Das Gehalt ist fair."},
+            {"de": "die Erfahrung", "en": "experience", "example": "Er hat viel Erfahrung."},
+            {"de": "die Kenntnisse", "en": "knowledge/skills", "example": "Sie hat gute Sprachkenntnisse."}
+          ]
+        },
+        {
+          "id": "media_tech",
+          "title": "Media & Technology",
+          "words": [
+            {"de": "die Nachricht", "en": "news/message", "example": "Hast du die Nachricht gelesen?"},
+            {"de": "die Zeitung", "en": "newspaper", "example": "Ich lese die Zeitung."},
+            {"de": "die Sendung", "en": "TV show/broadcast", "example": "Die Sendung war interessant."},
+            {"de": "herunterladen", "en": "to download", "example": "Ich lade die App herunter."},
+            {"de": "die Datei", "en": "file", "example": "Öffnen Sie die Datei."},
+            {"de": "das Passwort", "en": "password", "example": "Ich habe mein Passwort vergessen."},
+            {"de": "die Webseite", "en": "website", "example": "Die Webseite ist hilfreich."},
+            {"de": "die Suchmaschine", "en": "search engine", "example": "Benutze eine Suchmaschine."},
+            {"de": "das Netzwerk", "en": "network", "example": "Das Netzwerk ist langsam."},
+            {"de": "der Bildschirm", "en": "screen", "example": "Der Bildschirm ist kaputt."}
+          ]
+        },
+        {
+          "id": "environment",
+          "title": "Environment & Nature",
+          "words": [
+            {"de": "die Umwelt", "en": "environment", "example": "Wir müssen die Umwelt schützen."},
+            {"de": "der Klimawandel", "en": "climate change", "example": "Der Klimawandel ist ein Problem."},
+            {"de": "die Verschmutzung", "en": "pollution", "example": "Die Verschmutzung nimmt zu."},
+            {"de": "recyceln", "en": "to recycle", "example": "Wir recyceln Papier und Glas."},
+            {"de": "die Energie", "en": "energy", "example": "Erneuerbare Energie ist wichtig."},
+            {"de": "der Müll", "en": "trash/waste", "example": "Bitte trennen Sie den Müll."},
+            {"de": "die Natur", "en": "nature", "example": "Die Natur ist wunderschön."},
+            {"de": "der Wald", "en": "forest", "example": "Wir wandern im Wald."},
+            {"de": "das Tier", "en": "animal", "example": "Welches Tier magst du?"},
+            {"de": "schützen", "en": "to protect", "example": "Wir müssen Tiere schützen."}
+          ]
+        }
+      ],
+      "sentence_sections": [
+        {
+          "id": "relative_clauses",
+          "title": "Relative Clauses (der, die, das)",
+          "explanation": "Relative clauses give more info about a noun. The relative pronoun (der/die/das/den/dem) matches the gender/case of the noun. Verb goes to the END.",
+          "exercises": [
+            {"prompt": "The man who lives here is nice.", "answer": "Der Mann, der hier wohnt, ist nett.", "hint": "der (masc. nominative)", "words": ["Der", "Mann", "der", "hier", "wohnt", "ist", "nett"]},
+            {"prompt": "The woman whom I know is a doctor.", "answer": "Die Frau, die ich kenne, ist Ärztin.", "hint": "die (fem. accusative = same)", "words": ["Die", "Frau", "die", "ich", "kenne", "ist", "Ärztin"]},
+            {"prompt": "The book that I read is interesting.", "answer": "Das Buch, das ich lese, ist interessant.", "hint": "das (neuter accusative)", "words": ["Das", "Buch", "das", "ich", "lese", "ist", "interessant"]},
+            {"prompt": "The children who play outside are loud.", "answer": "Die Kinder, die draußen spielen, sind laut.", "hint": "die (plural nominative)", "words": ["Die", "Kinder", "die", "draußen", "spielen", "sind", "laut"]},
+            {"prompt": "The teacher whom I like is funny.", "answer": "Der Lehrer, den ich mag, ist lustig.", "hint": "den (masc. accusative)", "words": ["Der", "Lehrer", "den", "ich", "mag", "ist", "lustig"]}
+          ]
+        },
+        {
+          "id": "konjunktiv2",
+          "title": "Konjunktiv II (Wishes & Politeness)",
+          "explanation": "Konjunktiv II expresses wishes, hypothetical situations, or politeness. Common forms: wäre (would be), hätte (would have), könnte (could), würde + infinitive.",
+          "exercises": [
+            {"prompt": "I would like a coffee.", "answer": "Ich hätte gern einen Kaffee.", "hint": "hätte = would have", "words": ["Ich", "hätte", "gern", "einen", "Kaffee"]},
+            {"prompt": "If I were rich, I would travel.", "answer": "Wenn ich reich wäre, würde ich reisen.", "hint": "wäre = would be, würde = would", "words": ["Wenn", "ich", "reich", "wäre", "würde", "ich", "reisen"]},
+            {"prompt": "Could you help me?", "answer": "Könntest du mir helfen?", "hint": "könntest = could (du)", "words": ["Könntest", "du", "mir", "helfen"]},
+            {"prompt": "I would learn more if I had time.", "answer": "Ich würde mehr lernen, wenn ich Zeit hätte.", "hint": "hätte = would have", "words": ["Ich", "würde", "mehr", "lernen", "wenn", "ich", "Zeit", "hätte"]},
+            {"prompt": "She would be happy.", "answer": "Sie wäre glücklich.", "hint": "wäre = would be", "words": ["Sie", "wäre", "glücklich"]}
+          ]
+        },
+        {
+          "id": "passive_voice",
+          "title": "Passive Voice (werden + Partizip II)",
+          "explanation": "The passive shifts focus from who does something to what is done. Use werden + past participle. Example: Das Buch wird gelesen (The book is being read).",
+          "exercises": [
+            {"prompt": "The book is being read.", "answer": "Das Buch wird gelesen.", "hint": "werden + Partizip II", "words": ["Das", "Buch", "wird", "gelesen"]},
+            {"prompt": "German is spoken here.", "answer": "Hier wird Deutsch gesprochen.", "hint": "sprechen → gesprochen", "words": ["Hier", "wird", "Deutsch", "gesprochen"]},
+            {"prompt": "The house was built in 1990.", "answer": "Das Haus wurde 1990 gebaut.", "hint": "wurde = was (past passive)", "words": ["Das", "Haus", "wurde", "1990", "gebaut"]},
+            {"prompt": "The food is being prepared.", "answer": "Das Essen wird zubereitet.", "hint": "zubereiten → zubereitet", "words": ["Das", "Essen", "wird", "zubereitet"]},
+            {"prompt": "The door was opened.", "answer": "Die Tür wurde geöffnet.", "hint": "öffnen → geöffnet", "words": ["Die", "Tür", "wurde", "geöffnet"]}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b2",
+      "name": "B2 – Upper Intermediate",
+      "color": "#9C27B0",
+      "description": "Express yourself fluently on complex topics. Master advanced grammar, idiomatic expressions, and nuanced vocabulary.",
+      "vocab_sections": [
+        {
+          "id": "politics_society",
+          "title": "Politics & Society",
+          "words": [
+            {"de": "die Regierung", "en": "government", "example": "Die Regierung hat entschieden."},
+            {"de": "die Wahl", "en": "election", "example": "Die Wahl findet im September statt."},
+            {"de": "das Gesetz", "en": "law", "example": "Das neue Gesetz tritt in Kraft."},
+            {"de": "die Demokratie", "en": "democracy", "example": "Demokratie ist wichtig."},
+            {"de": "die Gesellschaft", "en": "society", "example": "Die Gesellschaft verändert sich."},
+            {"de": "die Gleichberechtigung", "en": "equal rights", "example": "Gleichberechtigung ist ein Ziel."},
+            {"de": "der Bürger", "en": "citizen", "example": "Jeder Bürger hat das Wahlrecht."},
+            {"de": "die Meinungsfreiheit", "en": "freedom of speech", "example": "Meinungsfreiheit ist ein Grundrecht."},
+            {"de": "die Verantwortung", "en": "responsibility", "example": "Wir tragen Verantwortung."},
+            {"de": "die Herausforderung", "en": "challenge", "example": "Das ist eine große Herausforderung."}
+          ]
+        },
+        {
+          "id": "business",
+          "title": "Business & Economics",
+          "words": [
+            {"de": "das Unternehmen", "en": "company/enterprise", "example": "Das Unternehmen wächst schnell."},
+            {"de": "der Umsatz", "en": "revenue/turnover", "example": "Der Umsatz stieg um 10%."},
+            {"de": "die Investition", "en": "investment", "example": "Die Investition hat sich gelohnt."},
+            {"de": "der Wettbewerb", "en": "competition", "example": "Der Wettbewerb ist stark."},
+            {"de": "die Verhandlung", "en": "negotiation", "example": "Die Verhandlung war erfolgreich."},
+            {"de": "der Vertrag", "en": "contract", "example": "Bitte unterschreiben Sie den Vertrag."},
+            {"de": "die Wirtschaft", "en": "economy", "example": "Die Wirtschaft erholt sich."},
+            {"de": "die Branche", "en": "industry/sector", "example": "In welcher Branche arbeiten Sie?"},
+            {"de": "der Gewinn", "en": "profit", "example": "Der Gewinn war höher als erwartet."},
+            {"de": "die Marke", "en": "brand", "example": "Die Marke ist weltweit bekannt."}
+          ]
+        },
+        {
+          "id": "idioms",
+          "title": "Idiomatic Expressions",
+          "words": [
+            {"de": "den Nagel auf den Kopf treffen", "en": "to hit the nail on the head", "example": "Damit hast du den Nagel auf den Kopf getroffen."},
+            {"de": "Daumen drücken", "en": "to keep one's fingers crossed", "example": "Ich drücke dir die Daumen!"},
+            {"de": "ins kalte Wasser springen", "en": "to jump in at the deep end", "example": "Manchmal muss man ins kalte Wasser springen."},
+            {"de": "den Faden verlieren", "en": "to lose one's train of thought", "example": "Entschuldigung, ich habe den Faden verloren."},
+            {"de": "auf dem Holzweg sein", "en": "to be on the wrong track", "example": "Da bist du auf dem Holzweg."},
+            {"de": "Schwein haben", "en": "to be lucky (colloquial)", "example": "Da hast du aber Schwein gehabt!"},
+            {"de": "etwas auf die leichte Schulter nehmen", "en": "to not take sth seriously", "example": "Nimm das nicht auf die leichte Schulter."},
+            {"de": "um den heißen Brei herumreden", "en": "to beat around the bush", "example": "Hör auf, um den heißen Brei herumzureden!"},
+            {"de": "jemandem auf die Nerven gehen", "en": "to get on someone's nerves", "example": "Er geht mir auf die Nerven."},
+            {"de": "die Nase voll haben", "en": "to be fed up", "example": "Ich habe die Nase voll davon."}
+          ]
+        },
+        {
+          "id": "abstract_concepts",
+          "title": "Abstract Concepts",
+          "words": [
+            {"de": "die Wahrnehmung", "en": "perception", "example": "Die Wahrnehmung ist subjektiv."},
+            {"de": "die Voraussetzung", "en": "prerequisite", "example": "Das ist eine wichtige Voraussetzung."},
+            {"de": "der Zusammenhang", "en": "context/connection", "example": "In diesem Zusammenhang ist es wichtig."},
+            {"de": "der Einfluss", "en": "influence", "example": "Social Media hat großen Einfluss."},
+            {"de": "die Entwicklung", "en": "development", "example": "Die Entwicklung geht weiter."},
+            {"de": "die Bedeutung", "en": "meaning/significance", "example": "Die Bedeutung dieses Wortes ist klar."},
+            {"de": "die Haltung", "en": "attitude/stance", "example": "Seine Haltung ist kritisch."},
+            {"de": "die Folge", "en": "consequence", "example": "Das hat schwere Folgen."},
+            {"de": "der Unterschied", "en": "difference", "example": "Was ist der Unterschied?"},
+            {"de": "die Möglichkeit", "en": "possibility", "example": "Es gibt viele Möglichkeiten."}
+          ]
+        },
+        {
+          "id": "academic",
+          "title": "Academic & Formal Language",
+          "words": [
+            {"de": "die Untersuchung", "en": "investigation/study", "example": "Die Untersuchung zeigt klare Ergebnisse."},
+            {"de": "berücksichtigen", "en": "to consider/take into account", "example": "Man muss alle Faktoren berücksichtigen."},
+            {"de": "darüber hinaus", "en": "furthermore/moreover", "example": "Darüber hinaus gibt es noch andere Aspekte."},
+            {"de": "im Hinblick auf", "en": "with regard to", "example": "Im Hinblick auf die Zukunft müssen wir handeln."},
+            {"de": "die Feststellung", "en": "finding/observation", "example": "Die Feststellung war überraschend."},
+            {"de": "der Standpunkt", "en": "point of view", "example": "Meinem Standpunkt nach ist das richtig."},
+            {"de": "zusammenfassen", "en": "to summarize", "example": "Lassen Sie mich zusammenfassen."},
+            {"de": "beeinflussen", "en": "to influence", "example": "Werbung beeinflusst unser Verhalten."},
+            {"de": "die Voraussage", "en": "prediction/forecast", "example": "Die Voraussage ist schwierig."},
+            {"de": "sich auseinandersetzen mit", "en": "to deal/engage with", "example": "Wir müssen uns damit auseinandersetzen."}
+          ]
+        }
+      ],
+      "sentence_sections": [
+        {
+          "id": "advanced_connectors",
+          "title": "Advanced Connectors (obwohl, trotzdem, indem, statt...zu)",
+          "explanation": "Use 'obwohl' (although – verb at end), 'trotzdem' (nevertheless – verb 2nd), 'indem' (by doing – verb at end), 'statt...zu' (instead of – with infinitive).",
+          "exercises": [
+            {"prompt": "Although it is raining, I go for a walk.", "answer": "Obwohl es regnet, gehe ich spazieren.", "hint": "obwohl → verb at end of clause", "words": ["Obwohl", "es", "regnet", "gehe", "ich", "spazieren"]},
+            {"prompt": "He is tired. Nevertheless, he works.", "answer": "Er ist müde. Trotzdem arbeitet er.", "hint": "Trotzdem → verb in 2nd position", "words": ["Er", "ist", "müde", "Trotzdem", "arbeitet", "er"]},
+            {"prompt": "You learn by reading a lot.", "answer": "Man lernt, indem man viel liest.", "hint": "indem → verb at end", "words": ["Man", "lernt", "indem", "man", "viel", "liest"]},
+            {"prompt": "Instead of watching TV, I read a book.", "answer": "Statt fernzusehen, lese ich ein Buch.", "hint": "statt + zu + infinitive", "words": ["Statt", "fernzusehen", "lese", "ich", "ein", "Buch"]},
+            {"prompt": "Even though she is young, she is very mature.", "answer": "Obwohl sie jung ist, ist sie sehr reif.", "hint": "obwohl + verb at end", "words": ["Obwohl", "sie", "jung", "ist", "ist", "sie", "sehr", "reif"]}
+          ]
+        },
+        {
+          "id": "double_infinitive",
+          "title": "Double Infinitive (Perfekt with Modals)",
+          "explanation": "When using Perfekt tense with modal verbs, you get a double infinitive at the end. Example: Ich habe arbeiten müssen (I had to work).",
+          "exercises": [
+            {"prompt": "I had to work yesterday.", "answer": "Ich habe gestern arbeiten müssen.", "hint": "haben + infinitive + modal", "words": ["Ich", "habe", "gestern", "arbeiten", "müssen"]},
+            {"prompt": "She was able to come.", "answer": "Sie hat kommen können.", "hint": "haben + infinitive + modal", "words": ["Sie", "hat", "kommen", "können"]},
+            {"prompt": "We wanted to go to the cinema.", "answer": "Wir haben ins Kino gehen wollen.", "hint": "wollen stays as infinitive", "words": ["Wir", "haben", "ins", "Kino", "gehen", "wollen"]},
+            {"prompt": "He was not allowed to drive.", "answer": "Er hat nicht fahren dürfen.", "hint": "nicht before double infinitive", "words": ["Er", "hat", "nicht", "fahren", "dürfen"]},
+            {"prompt": "I didn't have to wait long.", "answer": "Ich habe nicht lange warten müssen.", "hint": "müssen stays as infinitive", "words": ["Ich", "habe", "nicht", "lange", "warten", "müssen"]}
+          ]
+        },
+        {
+          "id": "nominalization",
+          "title": "Nominalization & Formal Structures",
+          "explanation": "In German, verbs and adjectives can become nouns (das Lesen, das Schöne). Formal German often uses nominalized forms. Always capitalize them and use the article 'das'.",
+          "exercises": [
+            {"prompt": "Reading is my hobby.", "answer": "Das Lesen ist mein Hobby.", "hint": "Verb → das + capitalized infinitive", "words": ["Das", "Lesen", "ist", "mein", "Hobby"]},
+            {"prompt": "The beautiful thing about it is the nature.", "answer": "Das Schöne daran ist die Natur.", "hint": "Adjective → das Schöne", "words": ["Das", "Schöne", "daran", "ist", "die", "Natur"]},
+            {"prompt": "Learning makes you smarter.", "answer": "Das Lernen macht klüger.", "hint": "lernen → das Lernen", "words": ["Das", "Lernen", "macht", "klüger"]},
+            {"prompt": "The most important thing is health.", "answer": "Das Wichtigste ist die Gesundheit.", "hint": "Superlative → das Wichtigste", "words": ["Das", "Wichtigste", "ist", "die", "Gesundheit"]},
+            {"prompt": "Travelling broadens the mind.", "answer": "Das Reisen erweitert den Horizont.", "hint": "reisen → das Reisen", "words": ["Das", "Reisen", "erweitert", "den", "Horizont"]}
+          ]
+        }
+      ]
+    }
+  ]
+}

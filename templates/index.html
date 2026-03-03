@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Roadmap{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>🇩🇪 German Language Roadmap</h1>
+    <p class="hero-sub">A structured path from <strong>A1 (Beginner)</strong> to <strong>B2 (Upper Intermediate)</strong>.<br>
+    Master vocabulary and sentence building at every level.</p>
+</section>
+
+<!-- Roadmap Timeline -->
+<section class="roadmap">
+    {% for level in levels %}
+    <div class="roadmap-level" style="--level-color: {{ level.color }};">
+        <div class="roadmap-marker">
+            <div class="roadmap-dot"></div>
+            {% if not loop.last %}<div class="roadmap-line"></div>{% endif %}
+        </div>
+        <div class="roadmap-card">
+            <div class="roadmap-header">
+                <span class="level-badge" style="background: {{ level.color }};">{{ level.id|upper }}</span>
+                <h2>{{ level.name }}</h2>
+            </div>
+            <p class="roadmap-desc">{{ level.description }}</p>
+            <div class="roadmap-sections">
+                <div class="roadmap-section-group">
+                    <h3>📚 Vocabulary</h3>
+                    <div class="subsection-chips">
+                        {% for sec in level.vocab_sections %}
+                        <span class="chip">{{ sec.title }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="/vocab/{{ level.id }}" class="btn btn-primary" style="background: {{ level.color }};">
+                        Start Vocab →
+                    </a>
+                </div>
+                <div class="roadmap-section-group">
+                    <h3>✍️ Sentence Making</h3>
+                    <div class="subsection-chips">
+                        {% for sec in level.sentence_sections %}
+                        <span class="chip">{{ sec.title }}</span>
+                        {% endfor %}
+                    </div>
+                    <a href="/sentences/{{ level.id }}" class="btn btn-primary" style="background: {{ level.color }};">
+                        Start Sentences →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</section>
+
+<section class="tips-section">
+    <h2>💡 Learning Tips</h2>
+    <div class="tips-grid">
+        <div class="tip-card">
+            <span class="tip-icon">🔄</span>
+            <h3>Daily Practice</h3>
+            <p>Spend 15-30 minutes every day. Consistency beats long cramming sessions.</p>
+        </div>
+        <div class="tip-card">
+            <span class="tip-icon">🗣️</span>
+            <h3>Speak Out Loud</h3>
+            <p>Read every German word and sentence aloud. Pronunciation improves with practice.</p>
+        </div>
+        <div class="tip-card">
+            <span class="tip-icon">📝</span>
+            <h3>Write Sentences</h3>
+            <p>Don't just memorize words — use them in your own sentences every day.</p>
+        </div>
+        <div class="tip-card">
+            <span class="tip-icon">🎧</span>
+            <h3>Listen Actively</h3>
+            <p>Watch German content with subtitles. Podcasts like "Slow German" are great.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

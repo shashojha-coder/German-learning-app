@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ level.name }} – Vocabulary{% endblock %}
+
+{% block content %}
+<div class="page-header" style="--level-color: {{ level.color }};">
+    <div class="breadcrumb">
+        <a href="/">Roadmap</a> › <span>Vocabulary</span> › <span>{{ level.id|upper }}</span>
+    </div>
+    <h1>📚 {{ level.name }} – Vocabulary</h1>
+    <p>{{ level.description }}</p>
+
+    <!-- Level navigation -->
+    <div class="level-nav">
+        {% for l in all_levels %}
+        <a href="/vocab/{{ l.id }}" 
+           class="level-nav-btn {% if l.id == level.id %}active{% endif %}"
+           style="{% if l.id == level.id %}background: {{ l.color }}; color: #fff;{% endif %}">
+            {{ l.id|upper }}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Section tabs -->
+<div class="section-tabs">
+    {% for sec in level.vocab_sections %}
+    <button class="tab-btn {% if loop.first %}active{% endif %}" 
+            onclick="switchTab('{{ sec.id }}', this)"
+            style="--tab-color: {{ level.color }};">
+        {{ sec.title }}
+    </button>
+    {% endfor %}
+</div>
+
+<!-- Vocab content -->
+{% for sec in level.vocab_sections %}
+<div class="vocab-section tab-content {% if loop.first %}active{% endif %}" id="tab-{{ sec.id }}">
+    <div class="section-header">
+        <h2>{{ sec.title }}</h2>
+        <div class="section-controls">
+            <button class="btn btn-sm" onclick="toggleAll('{{ sec.id }}')">Show/Hide All</button>
+            <button class="btn btn-sm" onclick="shuffleCards('{{ sec.id }}')">🔀 Shuffle</button>
+        </div>
+    </div>
+
+    <div class="vocab-grid" id="grid-{{ sec.id }}">
+        {% for word in sec.words %}
+        <div class="vocab-card" onclick="flipCard(this)">
+            <div class="vocab-card-inner">
+                <div class="vocab-front">
+                    <span class="vocab-de">{{ word.de }}</span>
+                    <span class="vocab-hint">Click to reveal</span>
+                </div>
+                <div class="vocab-back">
+                    <span class="vocab-en">{{ word.en }}</span>
+                    <div class="vocab-example">
+                        <span class="example-label">Example:</span>
+                        <span>{{ word.example }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Flashcard Quiz Mode -->
+    <div class="quiz-section">
+        <h3>🧠 Quick Quiz – {{ sec.title }}</h3>
+        <p>Type the English meaning of the German word shown.</p>
+        <div class="quiz-container" id="quiz-{{ sec.id }}">
+            <div class="quiz-card">
+                <div class="quiz-word" id="quizWord-{{ sec.id }}">—</div>
+                <input type="text" class="quiz-input" id="quizInput-{{ sec.id }}" 
+                       placeholder="Type the English meaning..." 
+                       onkeypress="if(event.key==='Enter') checkQuiz('{{ sec.id }}')">
+                <div class="quiz-buttons">
+                    <button class="btn btn-primary" style="background: {{ level.color }};" 
+                            onclick="checkQuiz('{{ sec.id }}')">Check</button>
+                    <button class="btn btn-sm" onclick="nextQuiz('{{ sec.id }}')">Skip →</button>
+                </div>
+                <div class="quiz-feedback" id="quizFeedback-{{ sec.id }}"></div>
+                <div class="quiz-score" id="quizScore-{{ sec.id }}">Score: 0 / 0</div>
+            </div>
+        </div>
+        <button class="btn btn-primary" style="background: {{ level.color }};" 
+                onclick="startQuiz('{{ sec.id }}')">Start Quiz</button>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Data for JS -->
+<script>
+    const vocabData = {{ level.vocab_sections | tojson }};
+</script>
+{% endblock %}
