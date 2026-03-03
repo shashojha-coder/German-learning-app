@@ -44,7 +44,8 @@
     <!-- Exercises -->
     <div class="exercises-container" id="exercises-{{ sec.id }}">
         {% for ex in sec.exercises %}
-        <div class="exercise-card" id="ex-{{ sec.id }}-{{ loop.index0 }}">
+        {% set ex_idx = loop.index0 %}
+        <div class="exercise-card" id="ex-{{ sec.id }}-{{ ex_idx }}">
             <div class="exercise-number">{{ loop.index }} / {{ sec.exercises|length }}</div>
             <div class="exercise-prompt">
                 <span class="prompt-label">Translate to German:</span>
@@ -52,14 +53,14 @@
             </div>
 
             <!-- Word bank (drag/click to build) -->
-            <div class="word-bank" id="bank-{{ sec.id }}-{{ loop.index0 }}">
+            <div class="word-bank" id="bank-{{ sec.id }}-{{ ex_idx }}">
                 {% for w in ex.words %}
-                <button class="word-tile" onclick="selectWord(this, '{{ sec.id }}', {{ loop.index0 }})">{{ w }}</button>
+                <button class="word-tile" onclick="selectWord(this, '{{ sec.id }}', {{ ex_idx }})">{{ w }}</button>
                 {% endfor %}
             </div>
 
             <!-- Answer area -->
-            <div class="answer-area" id="answer-{{ sec.id }}-{{ loop.index0 }}">
+            <div class="answer-area" id="answer-{{ sec.id }}-{{ ex_idx }}">
                 <span class="answer-placeholder">Click words above to build your sentence...</span>
             </div>
 
@@ -67,18 +68,18 @@
             <div class="type-answer">
                 <span class="or-divider">— or type your answer —</span>
                 <input type="text" class="sentence-input" 
-                       id="input-{{ sec.id }}-{{ loop.index0 }}" 
+                       id="input-{{ sec.id }}-{{ ex_idx }}" 
                        placeholder="Type the German sentence..."
                        data-correct="{{ ex.answer }}"
-                       onkeypress="if(event.key==='Enter') checkSentence('{{ sec.id }}', {{ loop.index0 }})">
+                       onkeypress="if(event.key==='Enter') checkSentence('{{ sec.id }}', {{ ex_idx }})">
             </div>
 
             <!-- Hint -->
             <div class="hint-section">
-                <button class="btn btn-sm hint-btn" onclick="showHint('{{ sec.id }}', {{ loop.index0 }})">
+                <button class="btn btn-sm hint-btn" onclick="showHint('{{ sec.id }}', {{ ex_idx }})">
                     💡 Show Hint
                 </button>
-                <span class="hint-text" id="hint-{{ sec.id }}-{{ loop.index0 }}" style="display:none;">
+                <span class="hint-text" id="hint-{{ sec.id }}-{{ ex_idx }}" style="display:none;">
                     {{ ex.hint }}
                 </span>
             </div>
@@ -86,14 +87,14 @@
             <!-- Check & Feedback -->
             <div class="exercise-actions">
                 <button class="btn btn-primary" style="background: {{ level.color }};" 
-                        onclick="checkSentence('{{ sec.id }}', {{ loop.index0 }})">
+                        onclick="checkSentence('{{ sec.id }}', {{ ex_idx }})">
                     Check Answer ✓
                 </button>
-                <button class="btn btn-sm" onclick="revealAnswer('{{ sec.id }}', {{ loop.index0 }})">
+                <button class="btn btn-sm" onclick="revealAnswer('{{ sec.id }}', {{ ex_idx }})">
                     Reveal Answer
                 </button>
             </div>
-            <div class="exercise-feedback" id="feedback-{{ sec.id }}-{{ loop.index0 }}"></div>
+            <div class="exercise-feedback" id="feedback-{{ sec.id }}-{{ ex_idx }}"></div>
         </div>
         {% endfor %}
     </div>

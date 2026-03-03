@@ -97,6 +97,21 @@ function nextQuiz(sectionId) {
     showQuizWord(sectionId);
 }
 
+/* ===== SHUFFLE WORD BANKS ON PAGE LOAD ===== */
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.word-bank').forEach(function(bank) {
+        const tiles = Array.from(bank.children);
+        for (let i = tiles.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            bank.appendChild(tiles[j]);
+            tiles.splice(j, 1);
+        }
+        // Final Fisher-Yates on DOM
+        const shuffled = Array.from(bank.children).sort(() => Math.random() - 0.5);
+        shuffled.forEach(el => bank.appendChild(el));
+    });
+});
+
 /* ===== SENTENCE BUILDING (WORD BANK) ===== */
 function selectWord(tile, sectionId, exIndex) {
     const answerArea = document.getElementById('answer-' + sectionId + '-' + exIndex);
