@@ -1,0 +1,11 @@
+{
+    "name": "German Learning App",
+    "forwardPorts": [5000],
+    "portsAttributes": {
+        "5000": {
+            "label": "German App",
+            "onAutoForward": "openBrowser",
+            "visibility": "public"
+        }
+    }
+}

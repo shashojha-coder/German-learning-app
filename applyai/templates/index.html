@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ApplyAI</title>
+
+<style>
+:root{--bg:#f7f4ef;--ink:#1a1612;--ink2:#4a4540;--ink3:#9a9590;--surface:#fff;--surface2:#f0ece5;--border:#e0d8ce;--accent:#c8622a;--accent2:#2a6cc8;--success:#2a8c5a;--warn:#c8962a;--danger:#c82a2a;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;font-size:15px;line-height:1.6}
+.app{display:flex;min-height:100vh}
+.sidebar{width:260px;flex-shrink:0;background:var(--ink);color:#e8e4de;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:10;transition:transform .3s ease}
+.sb-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo h1{font-family:'Georgia','Times New Roman',serif;font-size:1.6rem;color:#fff;letter-spacing:-.5px}
+.sb-logo h1 span{color:var(--accent);font-style:italic}
+.sb-logo p{font-size:.72rem;color:rgba(255,255,255,.4);margin-top:3px;font-family:'Courier New',Consolas,monospace}
+.sb-nav{padding:16px 12px;flex:1}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:.875rem;font-weight:500;color:rgba(255,255,255,.6);transition:all .2s;margin-bottom:2px}
+.ni:hover{background:rgba(255,255,255,.06);color:#fff}
+.ni.active{background:var(--accent);color:#fff}
+.sb-foot{padding:16px 24px;border-top:1px solid rgba(255,255,255,.08);font-size:.72rem;color:rgba(255,255,255,.25);font-family:'Courier New',Consolas,monospace}
+.main{margin-left:260px;flex:1;padding:40px;max-width:calc(100vw - 260px)}
+.mob-toggle{display:none;position:fixed;top:12px;left:12px;z-index:20;background:var(--ink);color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:1.2rem;cursor:pointer}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9}
+.panel{display:none}.panel.active{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ph{margin-bottom:32px}.ph h2{font-family:'Georgia','Times New Roman',serif;font-size:2rem;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}.ph p{color:var(--ink2);font-size:.9rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:20px}
+.ct{font-family:'Courier New',Consolas,monospace;font-size:.68rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:16px}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--ink2);margin-bottom:6px}
+input,textarea,select{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;font-size:.9rem;padding:10px 14px;transition:border-color .2s;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);background:#fff}
+textarea{resize:vertical;min-height:120px}.field{margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:8px;cursor:pointer;font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;padding:11px 20px;transition:all .2s;white-space:nowrap}
+.bp{background:var(--accent);color:#fff}.bp:hover{background:#b5561f;transform:translateY(-1px);box-shadow:0 4px 12px rgba(200,98,42,.3)}.bp:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.bs{background:var(--surface2);color:var(--ink);border:1.5px solid var(--border)}.bs:hover{border-color:var(--accent);color:var(--accent)}
+.bg{background:transparent;color:var(--ink2);border:1.5px solid var(--border);padding:7px 14px;font-size:.8rem}.bg:hover{border-color:var(--ink);color:var(--ink)}
+.bsucc{background:var(--success);color:#fff}
+.brow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.tabs{display:flex;gap:4px;background:var(--surface2);border-radius:10px;padding:4px;margin-bottom:20px;width:fit-content}
+.tab{padding:8px 16px;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:500;color:var(--ink2);transition:all .2s}
+.tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.ob{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:24px;font-size:.875rem;line-height:1.7;white-space:pre-wrap;min-height:200px;max-height:520px;overflow-y:auto;color:var(--ink)}
+.ob.empty{color:var(--ink3);display:flex;align-items:center;justify-content:center;font-style:italic}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:'Courier New',Consolas,monospace;font-size:.68rem;font-weight:500;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.06em}
+.ba{background:rgba(42,108,200,.12);color:var(--accent2)}.bi{background:rgba(200,150,42,.15);color:var(--warn)}.bo{background:rgba(42,140,90,.12);color:var(--success)}.br{background:rgba(200,42,42,.1);color:var(--danger)}.bw{background:rgba(154,149,144,.15);color:var(--ink3)}
+.tt{width:100%;border-collapse:collapse}
+.tt th{text-align:left;padding:10px 14px;font-family:'Courier New',Consolas,monospace;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);border-bottom:2px solid var(--border)}
+.tt td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:.875rem;vertical-align:middle}
+.tt tr:hover td{background:var(--surface2)}.tt tr:last-child td{border-bottom:none}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center}
+.sn{font-family:'Georgia','Times New Roman',serif;font-size:2.2rem;font-weight:700;line-height:1;margin-bottom:4px}
+.sl{font-size:.75rem;color:var(--ink3);font-weight:500;text-transform:uppercase;letter-spacing:.08em}
+.sc.sb .sn{color:var(--accent2)}.sc.so .sn{color:var(--accent)}.sc.sg2 .sn{color:var(--success)}.sc.sr .sn{color:var(--danger)}
+.ps{display:flex;align-items:center;gap:8px;font-size:.8rem;padding:8px 14px;border-radius:8px;margin-bottom:16px;font-weight:500}
+.ps.ok{background:rgba(42,140,90,.1);color:var(--success)}.ps.wn{background:rgba(200,150,42,.1);color:var(--warn)}
+.cb{background:#fff8f0;border:1.5px solid var(--accent);border-radius:var(--r);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;flex-wrap:wrap}
+.cb p{font-size:.9rem;font-weight:500}.cb-btns{display:flex;gap:8px}
+.tc{width:auto;padding:5px 10px;font-size:.8rem;border-radius:6px;background:var(--surface2)}
+.twc{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.uz{border:2px dashed var(--border);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
+.uz:hover{border-color:var(--accent);background:#fff8f5}.uz.hf{border-color:var(--success);background:#f0faf5;border-style:solid}
+.ui{font-size:2rem;margin-bottom:8px}.ut{font-size:.85rem;color:var(--ink2)}.ut strong{color:var(--accent)}
+.es{text-align:center;padding:60px 20px;color:var(--ink3)}.es .ei{font-size:3rem;margin-bottom:12px}.es h3{font-family:'Georgia','Times New Roman',serif;font-size:1.3rem;color:var(--ink2);margin-bottom:6px}.es p{font-size:.875rem}
+
+/* Mobile responsive */
+@media(max-width:900px){
+  .twc{grid-template-columns:1fr}
+  .sg{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .mob-toggle{display:block}
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .overlay.open{display:block}
+  .main{margin-left:0;max-width:100%;padding:60px 16px 24px}
+  .ph h2{font-size:1.5rem}
+  .tt{display:block;overflow-x:auto}
+}
+@media(max-width:480px){
+  .sg{grid-template-columns:1fr 1fr}
+  .brow{flex-direction:column}
+  .brow .btn{width:100%;justify-content:center}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<button class="mob-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <h1>Apply<span>AI</span></h1>
+    <p>Job Application Generator</p>
+  </div>
+  <nav class="sb-nav">
+    <div class="ni active" onclick="showPanel('generate')" id="nav-generate"><span>✦</span> Generate</div>
+    <div class="ni" onclick="showPanel('tracker')" id="nav-tracker"><span>◈</span> Tracker</div>
+    <div class="ni" onclick="showPanel('profile')" id="nav-profile"><span>◎</span> My Profile</div>
+  </nav>
+  <div class="sb-foot">Powered by Claude AI</div>
+</aside>
+
+<main class="main">
+
+<!-- GENERATE -->
+<div class="panel active" id="panel-generate">
+  <div class="ph"><h2>Generate Application</h2><p>Paste a job description — get a tailored CV + cover letter.</p></div>
+  <div id="profileWarning" class="ps wn" style="display:none">⚠ No base CV saved — go to <strong>My Profile</strong> first for best results.</div>
+  <div class="twc">
+    <div>
+      <div class="card">
+        <div class="ct">◌ Job Details</div>
+        <div class="field"><label>Job Title</label><input id="jobTitle" placeholder="e.g. Account Manager"/></div>
+        <div class="field"><label>Company</label><input id="jobCompany" placeholder="e.g. Salesforce"/></div>
+        <div class="field"><label>Job Link (optional)</label><input id="jobLink" placeholder="https://..."/></div>
+        <div class="field"><label>Job Description *</label><textarea id="jobDesc" rows="12" placeholder="Paste the full job description here..."></textarea></div>
+        <div class="brow">
+          <button class="btn bp" onclick="generate()" id="genBtn">✦ Generate Application</button>
+          <button class="btn bs" onclick="clearGen()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="ct">◈ Output</div>
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('cv')" id="tab-cv">CV</div>
+          <div class="tab" onclick="switchTab('cl')" id="tab-cl">Cover Letter</div>
+        </div>
+        <div id="out-cv">
+          <div class="ob empty" id="cvOut">Your tailored CV will appear here...</div>
+          <div class="brow" id="cvAct" style="display:none">
+            <button class="btn bg" onclick="copyOut('cv')" id="cvCp">⎘ Copy CV</button>
+            <button class="btn bg" onclick="dlOut('cv')">↓ Download</button>
+          </div>
+        </div>
+        <div id="out-cl" style="display:none">
+          <div class="ob empty" id="clOut">Your cover letter will appear here...</div>
+          <div class="brow" id="clAct" style="display:none">
+            <button class="btn bg" onclick="copyOut('cl')" id="clCp">⎘ Copy Letter</button>
+            <button class="btn bg" onclick="dlOut('cl')">↓ Download</button>
+          </div>
+        </div>
+      </div>
+      <div class="cb" id="confirmBar" style="display:none">
+        <p>🎯 Did you apply for this job?</p>
+        <div class="cb-btns">
+          <button class="btn bsucc bg" onclick="logApp(true)" style="background:var(--success);color:#fff;border:none">✓ Yes, applied!</button>
+          <button class="btn bg" onclick="logApp(false)">Not yet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKER -->
+<div class="panel" id="panel-tracker">
+  <div class="ph"><h2>Application Tracker</h2><p>Track and update every application as you progress.</p></div>
+  <div class="sg" id="statsGrid"></div>
+  <div class="card"><div class="ct">◈ Applications</div><div id="trackerBody"></div></div>
+</div>
+
+<!-- PROFILE -->
+<div class="panel" id="panel-profile">
+  <div class="ph"><h2>My Profile</h2><p>Save your base CV and cover letter for AI to use.</p></div>
+  <div class="twc">
+    <div class="card">
+      <div class="ct">◌ Personal Info & Base CV</div>
+      <div class="field"><label>Your Name</label><input id="pName" placeholder="Shashank Ojha"/></div>
+      <div class="field"><label>Email</label><input id="pEmail" placeholder="you@email.com"/></div>
+      <div class="field"><label>Phone</label><input id="pPhone" placeholder="+49 155 ..."/></div>
+      <div class="field"><label>Location</label><input id="pLoc" placeholder="Berlin, Germany"/></div>
+      <div class="field"><label>Paste your full CV text</label><textarea id="baseCV" rows="14" placeholder="Copy and paste your entire CV here. The AI uses this as the source of truth."></textarea></div>
+      <button class="btn bp" onclick="saveProfile()">Save Profile</button>
+    </div>
+    <div class="card">
+      <div class="ct">◌ Base Cover Letter</div>
+      <div class="field"><label>Upload text file (.txt)</label>
+        <div class="uz" id="uzZone" onclick="document.getElementById('clFile').click()">
+          <div class="ui">📄</div>
+          <div class="ut"><strong>Click to upload</strong> a .txt file or drag &amp; drop</div>
+        </div>
+        <input type="file" id="clFile" accept=".txt" style="display:none" onchange="handleUpload(event)"/>
+      </div>
+      <div class="field"><label>Or paste cover letter text</label><textarea id="baseCL" rows="12" placeholder="Paste your existing cover letter here..."></textarea></div>
+      <div class="ps ok" id="savedMsg" style="display:none">✓ Profile saved!</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<script>
+/* ─── Helpers ─── */
+function esc(str) {
+  const el = document.createElement('span');
+  el.textContent = str;
+  return el.innerHTML;
+}
+
+function sanitizeUrl(url) {
+  if (!url) return '';
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return parsed.href;
+  } catch (e) {}
+  return '';
+}
+
+/* ─── State ─── */
+let profile = { name: '', email: '', phone: '', location: '', cv: '', cl: '' };
+let apps = [];
+let gen = { cv: '', cl: '', title: '', company: '', link: '' };
+let activeTab = 'cv';
+
+/* ─── Storage (localStorage) ─── */
+function load() {
+  try {
+    const p = localStorage.getItem('applyai_profile');
+    if (p) profile = JSON.parse(p);
+    const a = localStorage.getItem('applyai_apps');
+    if (a) apps = JSON.parse(a);
+  } catch (e) {
+    console.warn('Failed to load from localStorage:', e);
+  }
+  fillProfile();
+  renderTracker();
+  checkWarn();
+}
+
+function save() {
+  try {
+    localStorage.setItem('applyai_profile', JSON.stringify(profile));
+    localStorage.setItem('applyai_apps', JSON.stringify(apps));
+  } catch (e) {
+    console.warn('Failed to save to localStorage:', e);
+  }
+}
+
+/* ─── Navigation ─── */
+function showPanel(n) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(i => i.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.getElementById('nav-' + n).classList.add('active');
+  if (n === 'tracker') renderTracker();
+  // Close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+function switchTab(t) {
+  activeTab = t;
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.getElementById('tab-' + t).classList.add('active');
+  document.getElementById('out-cv').style.display = t === 'cv' ? 'block' : 'none';
+  document.getElementById('out-cl').style.display = t === 'cl' ? 'block' : 'none';
+}
+
+/* ─── Profile ─── */
+function fillProfile() {
+  document.getElementById('pName').value = profile.name || '';
+  document.getElementById('pEmail').value = profile.email || '';
+  document.getElementById('pPhone').value = profile.phone || '';
+  document.getElementById('pLoc').value = profile.location || '';
+  document.getElementById('baseCV').value = profile.cv || '';
+  document.getElementById('baseCL').value = profile.cl || '';
+}
+
+function saveProfile() {
+  profile.name = document.getElementById('pName').value.trim();
+  profile.email = document.getElementById('pEmail').value.trim();
+  profile.phone = document.getElementById('pPhone').value.trim();
+  profile.location = document.getElementById('pLoc').value.trim();
+  profile.cv = document.getElementById('baseCV').value.trim();
+  profile.cl = document.getElementById('baseCL').value.trim();
+  save();
+  const m = document.getElementById('savedMsg');
+  m.style.display = 'flex';
+  setTimeout(() => m.style.display = 'none', 3000);
+  checkWarn();
+}
+
+function checkWarn() {
+  const w = document.getElementById('profileWarning');
+  if (w) w.style.display = profile.cv ? 'none' : 'flex';
+}
+
+/* ─── File Upload (text files only) ─── */
+async function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (!file.name.endsWith('.txt')) {
+    alert('Only .txt files are supported. For PDF or DOCX, please copy-paste the text into the text area below.');
+    e.target.value = '';
+    return;
+  }
+
+  const text = await file.text();
+  document.getElementById('uzZone').innerHTML =
+    '<div class="ui">✅</div><div class="ut"><strong>' + esc(file.name) + '</strong> uploaded</div>';
+  document.getElementById('uzZone').classList.add('hf');
+  document.getElementById('baseCL').value = text;
+}
+
+/* ─── Generation (via backend proxy) ─── */
+async function generate() {
+  const jd = document.getElementById('jobDesc').value.trim();
+  const title = document.getElementById('jobTitle').value.trim() || 'the role';
+  const company = document.getElementById('jobCompany').value.trim() || 'the company';
+  const link = document.getElementById('jobLink').value.trim();
+
+  if (!jd) { document.getElementById('jobDesc').focus(); return; }
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  document.getElementById('confirmBar').style.display = 'none';
+  document.getElementById('cvAct').style.display = 'none';
+  document.getElementById('clAct').style.display = 'none';
+
+  const cvOut = document.getElementById('cvOut');
+  const clOut = document.getElementById('clOut');
+  cvOut.className = 'ob';
+  cvOut.textContent = 'Analysing job description and tailoring your CV...';
+  clOut.className = 'ob';
+  clOut.textContent = '';
+
+  const sys = `You are an expert career coach and resume writer generating ATS-optimized job application documents.
+RULES:
+- Never fabricate skills, experience, certifications, or metrics not present in the candidate's base CV
+- Write naturally and impact-driven — avoid "as required by the job posting" or keyword stuffing
+- CV: one page worth of content, bullet-based, metrics where available, strong tailored summary
+- Cover letter: 3 short paragraphs max, persuasive, organization-value focused, not a CV repeat
+- Output ONLY the documents in the exact format requested`;
+
+  const prompt = `Tailor a CV and cover letter for this specific job application.
+
+CANDIDATE:
+Name: ${profile.name || 'The Candidate'}
+Email: ${profile.email || ''}
+Phone: ${profile.phone || ''}
+Location: ${profile.location || ''}
+
+BASE CV (source of truth — do not invent anything):
+${profile.cv || 'No base CV provided — generate from profile info only'}
+
+BASE COVER LETTER STYLE REFERENCE:
+${profile.cl || 'No base cover letter — write fresh'}
+
+TARGET JOB:
+Title: ${title}
+Company: ${company}
+Description:
+${jd.substring(0, 3000)}
+
+Return EXACTLY this structure with no extra commentary:
+===CV START===
+[Tailored one-page CV here]
+===CV END===
+
+===COVER LETTER START===
+[Tailored one-page cover letter here]
+===COVER LETTER END===`;
+
+  try {
+    const r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: sys, prompt: prompt })
+    });
+    const d = await r.json();
+
+    if (!r.ok || d.error) {
+      throw new Error(d.error || 'Request failed (' + r.status + ')');
+    }
+
+    const text = d.text || '';
+    const cvM = text.match(/===CV START===([\s\S]*?)===CV END===/);
+    const clM = text.match(/===COVER LETTER START===([\s\S]*?)===COVER LETTER END===/);
+    const cvT = cvM ? cvM[1].trim() : text;
+    const clT = clM ? clM[1].trim() : '';
+
+    cvOut.textContent = cvT;
+    cvOut.className = 'ob';
+    clOut.textContent = clT;
+    clOut.className = 'ob';
+    gen = { cv: cvT, cl: clT, title, company, link };
+    document.getElementById('cvAct').style.display = 'flex';
+    if (clT) document.getElementById('clAct').style.display = 'flex';
+    document.getElementById('confirmBar').style.display = 'flex';
+  } catch (err) {
+    cvOut.textContent = 'Error: ' + err.message;
+    cvOut.className = 'ob';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '✦ Generate Application';
+}
+
+/* ─── Output Actions ─── */
+function copyOut(t) {
+  const text = t === 'cv' ? gen.cv : gen.cl;
+  navigator.clipboard.writeText(text);
+  const btn = document.getElementById(t + 'Cp');
+  btn.textContent = '✓ Copied!';
+  setTimeout(() => btn.textContent = t === 'cv' ? '⎘ Copy CV' : '⎘ Copy Letter', 2000);
+}
+
+function dlOut(t) {
+  const text = t === 'cv' ? gen.cv : gen.cl;
+  const safeCo = gen.company.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const safeTi = gen.title.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const name = t === 'cv' ? 'CV_' + safeCo + '_' + safeTi + '.txt' : 'CoverLetter_' + safeCo + '_' + safeTi + '.txt';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ─── Application Tracker ─── */
+function logApp(applied) {
+  document.getElementById('confirmBar').style.display = 'none';
+  if (!applied) return;
+
+  const entry = {
+    id: Date.now(),
+    title: gen.title,
+    company: gen.company,
+    link: sanitizeUrl(gen.link),
+    date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+    status: 'applied'
+  };
+  apps.unshift(entry);
+  save();
+
+  const cb = document.getElementById('confirmBar');
+  cb.innerHTML = '';
+  const msg = document.createElement('p');
+  msg.textContent = '✅ Logged! ' + entry.title + ' at ' + entry.company;
+  const viewBtn = document.createElement('button');
+  viewBtn.className = 'btn bg';
+  viewBtn.style.cssText = 'border-color:var(--success);color:var(--success)';
+  viewBtn.textContent = 'View Tracker →';
+  viewBtn.onclick = function () { showPanel('tracker'); };
+  cb.appendChild(msg);
+  cb.appendChild(viewBtn);
+  cb.style.display = 'flex';
+  cb.style.background = '#f0faf5';
+  cb.style.borderColor = 'var(--success)';
+}
+
+const SL = { applied: 'Applied', interview: 'Interview', offer: 'Offer', rejected: 'Rejected', withdrawn: 'Withdrawn' };
+const SB = { applied: 'ba', interview: 'bi', offer: 'bo', rejected: 'br', withdrawn: 'bw' };
+
+function renderTracker() {
+  const total = apps.length;
+  const iv = apps.filter(a => a.status === 'interview').length;
+  const of_ = apps.filter(a => a.status === 'offer').length;
+  const rj = apps.filter(a => a.status === 'rejected').length;
+
+  document.getElementById('statsGrid').innerHTML =
+    '<div class="sc sb"><div class="sn">' + total + '</div><div class="sl">Total Applied</div></div>' +
+    '<div class="sc so"><div class="sn">' + iv + '</div><div class="sl">Interviews</div></div>' +
+    '<div class="sc sg2"><div class="sn">' + of_ + '</div><div class="sl">Offers</div></div>' +
+    '<div class="sc sr"><div class="sn">' + rj + '</div><div class="sl">Rejected</div></div>';
+
+  const body = document.getElementById('trackerBody');
+  if (!apps.length) {
+    body.innerHTML = '<div class="es"><div class="ei">📭</div><h3>No applications yet</h3>' +
+      '<p>Generate your first application and click "Yes, I applied!" to track it here.</p></div>';
+    return;
+  }
+
+  // Build table safely with DOM APIs to prevent XSS
+  const table = document.createElement('table');
+  table.className = 'tt';
+
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  ['Role', 'Company', 'Date', 'Status', 'Update'].forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  apps.forEach(a => {
+    const tr = document.createElement('tr');
+
+    // Role
+    const tdRole = document.createElement('td');
+    const strong = document.createElement('strong');
+    strong.textContent = a.title;
+    tdRole.appendChild(strong);
+    tr.appendChild(tdRole);
+
+    // Company
+    const tdCompany = document.createElement('td');
+    tdCompany.textContent = a.company;
+    tr.appendChild(tdCompany);
+
+    // Date
+    const tdDate = document.createElement('td');
+    tdDate.style.cssText = 'color:var(--ink3);font-size:.8rem';
+    tdDate.textContent = a.date;
+    tr.appendChild(tdDate);
+
+    // Status badge
+    const tdStatus = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + (SB[a.status] || 'bw');
+    badge.textContent = SL[a.status] || a.status;
+    tdStatus.appendChild(badge);
+    tr.appendChild(tdStatus);
+
+    // Update select + link
+    const tdUpdate = document.createElement('td');
+    const sel = document.createElement('select');
+    sel.className = 'tc';
+    sel.addEventListener('change', function () { updateStatus(a.id, this.value); });
+    Object.entries(SL).forEach(function ([v, l]) {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = l;
+      if (a.status === v) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    tdUpdate.appendChild(sel);
+
+    const safeLink = sanitizeUrl(a.link);
+    if (safeLink) {
+      const link = document.createElement('a');
+      link.href = safeLink;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.style.cssText = 'margin-left:8px;font-size:.8rem;color:var(--accent2)';
+      link.textContent = '↗';
+      tdUpdate.appendChild(link);
+    }
+    tr.appendChild(tdUpdate);
+
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  body.innerHTML = '';
+  body.appendChild(table);
+}
+
+function updateStatus(id, status) {
+  // Validate that status is one of the allowed values
+  if (!SL.hasOwnProperty(status)) return;
+  const a = apps.find(x => x.id === id);
+  if (a) { a.status = status; save(); renderTracker(); }
+}
+
+function clearGen() {
+  ['jobTitle', 'jobCompany', 'jobLink', 'jobDesc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('cvOut').textContent = 'Your tailored CV will appear here...';
+  document.getElementById('cvOut').className = 'ob empty';
+  document.getElementById('clOut').textContent = 'Your cover letter will appear here...';
+  document.getElementById('clOut').className = 'ob empty';
+  document.getElementById('cvAct').style.display = 'none';
+  document.getElementById('clAct').style.display = 'none';
+  document.getElementById('confirmBar').style.display = 'none';
+}
+
+/* ─── Init ─── */
+load();
+</script>
+</body>
+</html>

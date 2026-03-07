@@ -1,379 +1,14 @@
 /**
  * DYNAMIC SENTENCE GENERATOR ENGINE
- * Generates unlimited unique German sentences for practice based on
- * grammar templates + word pools per section.
+ * 300+ sentences per level (A1, A2, B1, B2) = 1200+ total sentences
  * Tracks used combinations to avoid repetition within a session.
  */
 
 const SentenceGenerator = (function () {
 
-    // ========== WORD POOLS ==========
-    const pools = {
-        // --- Subjects ---
-        subjects: [
-            { de: "Ich", en: "I", verb_form: "1s" },
-            { de: "Du", en: "You (informal)", verb_form: "2s" },
-            { de: "Er", en: "He", verb_form: "3s" },
-            { de: "Sie", en: "She", verb_form: "3s" },
-            { de: "Wir", en: "We", verb_form: "1p" },
-            { de: "Ihr", en: "You (plural)", verb_form: "2p" },
-            { de: "Sie", en: "They", verb_form: "3p" },
-        ],
-        // Singular only subjects (for simpler patterns)
-        subjects_simple: [
-            { de: "Ich", en: "I", verb_form: "1s" },
-            { de: "Du", en: "You", verb_form: "2s" },
-            { de: "Er", en: "He", verb_form: "3s" },
-            { de: "Sie", en: "She", verb_form: "3s" },
-            { de: "Wir", en: "We", verb_form: "1p" },
-        ],
-
-        // --- Verbs (present tense conjugations) ---
-        verbs_transitive: [
-            { inf: "trinken", en: "drink", obj_required: true,
-              conj: { "1s":"trinke","2s":"trinkst","3s":"trinkt","1p":"trinken","2p":"trinkt","3p":"trinken" },
-              partizip: "getrunken", aux: "haben" },
-            { inf: "essen", en: "eat", obj_required: true,
-              conj: { "1s":"esse","2s":"isst","3s":"isst","1p":"essen","2p":"esst","3p":"essen" },
-              partizip: "gegessen", aux: "haben" },
-            { inf: "lesen", en: "read", obj_required: true,
-              conj: { "1s":"lese","2s":"liest","3s":"liest","1p":"lesen","2p":"lest","3p":"lesen" },
-              partizip: "gelesen", aux: "haben" },
-            { inf: "kaufen", en: "buy", obj_required: true,
-              conj: { "1s":"kaufe","2s":"kaufst","3s":"kauft","1p":"kaufen","2p":"kauft","3p":"kaufen" },
-              partizip: "gekauft", aux: "haben" },
-            { inf: "kochen", en: "cook", obj_required: true,
-              conj: { "1s":"koche","2s":"kochst","3s":"kocht","1p":"kochen","2p":"kocht","3p":"kochen" },
-              partizip: "gekocht", aux: "haben" },
-            { inf: "schreiben", en: "write", obj_required: true,
-              conj: { "1s":"schreibe","2s":"schreibst","3s":"schreibt","1p":"schreiben","2p":"schreibt","3p":"schreiben" },
-              partizip: "geschrieben", aux: "haben" },
-            { inf: "lernen", en: "learn", obj_required: true,
-              conj: { "1s":"lerne","2s":"lernst","3s":"lernt","1p":"lernen","2p":"lernt","3p":"lernen" },
-              partizip: "gelernt", aux: "haben" },
-            { inf: "suchen", en: "look for", obj_required: true,
-              conj: { "1s":"suche","2s":"suchst","3s":"sucht","1p":"suchen","2p":"sucht","3p":"suchen" },
-              partizip: "gesucht", aux: "haben" },
-            { inf: "brauchen", en: "need", obj_required: true,
-              conj: { "1s":"brauche","2s":"brauchst","3s":"braucht","1p":"brauchen","2p":"braucht","3p":"brauchen" },
-              partizip: "gebraucht", aux: "haben" },
-            { inf: "nehmen", en: "take", obj_required: true,
-              conj: { "1s":"nehme","2s":"nimmst","3s":"nimmt","1p":"nehmen","2p":"nehmt","3p":"nehmen" },
-              partizip: "genommen", aux: "haben" },
-        ],
-
-        verbs_intransitive: [
-            { inf: "gehen", en: "go",
-              conj: { "1s":"gehe","2s":"gehst","3s":"geht","1p":"gehen","2p":"geht","3p":"gehen" },
-              partizip: "gegangen", aux: "sein" },
-            { inf: "kommen", en: "come",
-              conj: { "1s":"komme","2s":"kommst","3s":"kommt","1p":"kommen","2p":"kommt","3p":"kommen" },
-              partizip: "gekommen", aux: "sein" },
-            { inf: "laufen", en: "run",
-              conj: { "1s":"laufe","2s":"läufst","3s":"läuft","1p":"laufen","2p":"lauft","3p":"laufen" },
-              partizip: "gelaufen", aux: "sein" },
-            { inf: "schlafen", en: "sleep",
-              conj: { "1s":"schlafe","2s":"schläfst","3s":"schläft","1p":"schlafen","2p":"schlaft","3p":"schlafen" },
-              partizip: "geschlafen", aux: "haben" },
-            { inf: "arbeiten", en: "work",
-              conj: { "1s":"arbeite","2s":"arbeitest","3s":"arbeitet","1p":"arbeiten","2p":"arbeitet","3p":"arbeiten" },
-              partizip: "gearbeitet", aux: "haben" },
-            { inf: "spielen", en: "play",
-              conj: { "1s":"spiele","2s":"spielst","3s":"spielt","1p":"spielen","2p":"spielt","3p":"spielen" },
-              partizip: "gespielt", aux: "haben" },
-            { inf: "schwimmen", en: "swim",
-              conj: { "1s":"schwimme","2s":"schwimmst","3s":"schwimmt","1p":"schwimmen","2p":"schwimmt","3p":"schwimmen" },
-              partizip: "geschwommen", aux: "sein" },
-            { inf: "reisen", en: "travel",
-              conj: { "1s":"reise","2s":"reist","3s":"reist","1p":"reisen","2p":"reist","3p":"reisen" },
-              partizip: "gereist", aux: "sein" },
-            { inf: "tanzen", en: "dance",
-              conj: { "1s":"tanze","2s":"tanzt","3s":"tanzt","1p":"tanzen","2p":"tanzt","3p":"tanzen" },
-              partizip: "getanzt", aux: "haben" },
-            { inf: "singen", en: "sing",
-              conj: { "1s":"singe","2s":"singst","3s":"singt","1p":"singen","2p":"singt","3p":"singen" },
-              partizip: "gesungen", aux: "haben" },
-        ],
-
-        // --- Objects (accusative) ---
-        objects_acc: [
-            { de: "einen Kaffee", en: "a coffee" },
-            { de: "ein Buch", en: "a book" },
-            { de: "einen Apfel", en: "an apple" },
-            { de: "eine Suppe", en: "a soup" },
-            { de: "das Brot", en: "the bread" },
-            { de: "den Kuchen", en: "the cake" },
-            { de: "einen Brief", en: "a letter" },
-            { de: "die Zeitung", en: "the newspaper" },
-            { de: "ein Ei", en: "an egg" },
-            { de: "den Tee", en: "the tea" },
-            { de: "Deutsch", en: "German" },
-            { de: "Musik", en: "music" },
-            { de: "Wasser", en: "water" },
-            { de: "eine Banane", en: "a banana" },
-            { de: "den Schlüssel", en: "the key" },
-        ],
-
-        // --- Objects for kein-negation (indefinite only) ---
-        objects_kein: [
-            { de_pos: "einen Kaffee", de_neg: "keinen Kaffee", en: "coffee" },
-            { de_pos: "ein Buch", de_neg: "kein Buch", en: "book" },
-            { de_pos: "einen Apfel", de_neg: "keinen Apfel", en: "apple" },
-            { de_pos: "ein Auto", de_neg: "kein Auto", en: "car" },
-            { de_pos: "eine Katze", de_neg: "keine Katze", en: "cat" },
-            { de_pos: "einen Hund", de_neg: "keinen Hund", en: "dog" },
-            { de_pos: "ein Telefon", de_neg: "kein Telefon", en: "phone" },
-            { de_pos: "eine Tasche", de_neg: "keine Tasche", en: "bag" },
-            { de_pos: "ein Ticket", de_neg: "kein Ticket", en: "ticket" },
-            { de_pos: "Geld", de_neg: "kein Geld", en: "money" },
-        ],
-
-        // --- W-Question words ---
-        w_words: [
-            { de: "Wo", en: "Where" },
-            { de: "Wann", en: "When" },
-            { de: "Was", en: "What" },
-            { de: "Wie", en: "How" },
-            { de: "Warum", en: "Why" },
-        ],
-
-        // --- Question verbs ---
-        question_verbs: [
-            { de_2s: "wohnst", de_3s: "wohnt", inf: "wohnen", en: "live" },
-            { de_2s: "arbeitest", de_3s: "arbeitet", inf: "arbeiten", en: "work" },
-            { de_2s: "kommst", de_3s: "kommt", inf: "kommen", en: "come" },
-            { de_2s: "gehst", de_3s: "geht", inf: "gehen", en: "go" },
-            { de_2s: "spielst", de_3s: "spielt", inf: "spielen", en: "play" },
-            { de_2s: "lernst", de_3s: "lernt", inf: "lernen", en: "learn" },
-            { de_2s: "trinkst", de_3s: "trinkt", inf: "trinken", en: "drink" },
-            { de_2s: "isst", de_3s: "isst", inf: "essen", en: "eat" },
-            { de_2s: "liest", de_3s: "liest", inf: "lesen", en: "read" },
-            { de_2s: "schläfst", de_3s: "schläft", inf: "schlafen", en: "sleep" },
-        ],
-
-        // --- Places (for travel / location) ---
-        places: [
-            { de: "nach Berlin", en: "to Berlin" },
-            { de: "nach München", en: "to Munich" },
-            { de: "nach Hause", en: "home" },
-            { de: "in die Schule", en: "to school" },
-            { de: "ins Kino", en: "to the cinema" },
-            { de: "zum Arzt", en: "to the doctor" },
-            { de: "zum Bahnhof", en: "to the train station" },
-            { de: "in den Park", en: "to the park" },
-            { de: "ins Büro", en: "to the office" },
-            { de: "zum Supermarkt", en: "to the supermarket" },
-        ],
-
-        // --- Time expressions ---
-        times: [
-            { de: "heute", en: "today" },
-            { de: "morgen", en: "tomorrow" },
-            { de: "gestern", en: "yesterday" },
-            { de: "jetzt", en: "now" },
-            { de: "oft", en: "often" },
-            { de: "immer", en: "always" },
-            { de: "manchmal", en: "sometimes" },
-            { de: "jeden Tag", en: "every day" },
-        ],
-
-        // --- Modal verbs ---
-        modals: [
-            { de: "können", en: "can",
-              conj: { "1s":"kann","2s":"kannst","3s":"kann","1p":"können","2p":"könnt","3p":"können" } },
-            { de: "müssen", en: "must/have to",
-              conj: { "1s":"muss","2s":"musst","3s":"muss","1p":"müssen","2p":"müsst","3p":"müssen" } },
-            { de: "wollen", en: "want to",
-              conj: { "1s":"will","2s":"willst","3s":"will","1p":"wollen","2p":"wollt","3p":"wollen" } },
-            { de: "sollen", en: "should",
-              conj: { "1s":"soll","2s":"sollst","3s":"soll","1p":"sollen","2p":"sollt","3p":"sollen" } },
-            { de: "dürfen", en: "may/be allowed to",
-              conj: { "1s":"darf","2s":"darfst","3s":"darf","1p":"dürfen","2p":"dürft","3p":"dürfen" } },
-        ],
-
-        // --- Adjectives ---
-        adjectives: [
-            { de: "müde", en: "tired" },
-            { de: "hungrig", en: "hungry" },
-            { de: "glücklich", en: "happy" },
-            { de: "traurig", en: "sad" },
-            { de: "krank", en: "sick" },
-            { de: "gesund", en: "healthy" },
-            { de: "schnell", en: "fast" },
-            { de: "langsam", en: "slow" },
-            { de: "nett", en: "nice" },
-            { de: "stark", en: "strong" },
-            { de: "jung", en: "young" },
-            { de: "alt", en: "old" },
-        ],
-
-        // --- Reasons (for weil clauses) ---
-        reasons: [
-            { de_clause: "krank ist", en_clause: "is sick", applies_to: "3s" },
-            { de_clause: "müde bin", en_clause: "am tired", applies_to: "1s" },
-            { de_clause: "Hunger hat", en_clause: "is hungry", applies_to: "3s" },
-            { de_clause: "keine Zeit hat", en_clause: "has no time", applies_to: "3s" },
-            { de_clause: "arbeiten muss", en_clause: "has to work", applies_to: "3s" },
-            { de_clause: "Deutsch lerne", en_clause: "am learning German", applies_to: "1s" },
-            { de_clause: "in Berlin wohnt", en_clause: "lives in Berlin", applies_to: "3s" },
-            { de_clause: "Urlaub hat", en_clause: "has vacation", applies_to: "3s" },
-            { de_clause: "es regnet", en_clause: "it is raining", applies_to: "any" },
-            { de_clause: "das Essen gut schmeckt", en_clause: "the food tastes good", applies_to: "any" },
-        ],
-
-        // --- Passive objects ---
-        passive_items: [
-            { de_subj: "Das Buch", de_partizip: "gelesen", en_subj: "The book", en_verb: "read" },
-            { de_subj: "Das Essen", de_partizip: "gekocht", en_subj: "The food", en_verb: "cooked" },
-            { de_subj: "Der Brief", de_partizip: "geschrieben", en_subj: "The letter", en_verb: "written" },
-            { de_subj: "Die Tür", de_partizip: "geöffnet", en_subj: "The door", en_verb: "opened" },
-            { de_subj: "Das Haus", de_partizip: "gebaut", en_subj: "The house", en_verb: "built" },
-            { de_subj: "Das Auto", de_partizip: "repariert", en_subj: "The car", en_verb: "repaired" },
-            { de_subj: "Die Aufgabe", de_partizip: "erledigt", en_subj: "The task", en_verb: "completed" },
-            { de_subj: "Der Kuchen", de_partizip: "gebacken", en_subj: "The cake", en_verb: "baked" },
-            { de_subj: "Die E-Mail", de_partizip: "geschickt", en_subj: "The email", en_verb: "sent" },
-            { de_subj: "Das Fenster", de_partizip: "geschlossen", en_subj: "The window", en_verb: "closed" },
-            { de_subj: "Das Lied", de_partizip: "gesungen", en_subj: "The song", en_verb: "sung" },
-            { de_subj: "Die Rechnung", de_partizip: "bezahlt", en_subj: "The bill", en_verb: "paid" },
-        ],
-
-        // --- Relative clause nouns ---
-        rel_nouns: [
-            { de: "Der Mann", en: "The man", gender: "m", rel_nom: "der", rel_acc: "den" },
-            { de: "Die Frau", en: "The woman", gender: "f", rel_nom: "die", rel_acc: "die" },
-            { de: "Das Kind", en: "The child", gender: "n", rel_nom: "das", rel_acc: "das" },
-            { de: "Der Lehrer", en: "The teacher", gender: "m", rel_nom: "der", rel_acc: "den" },
-            { de: "Die Ärztin", en: "The doctor (f)", gender: "f", rel_nom: "die", rel_acc: "die" },
-            { de: "Der Student", en: "The student", gender: "m", rel_nom: "der", rel_acc: "den" },
-            { de: "Das Mädchen", en: "The girl", gender: "n", rel_nom: "das", rel_acc: "das" },
-        ],
-
-        rel_predicates_nom: [
-            { de: "hier wohnt", en: "who lives here" },
-            { de: "Deutsch spricht", en: "who speaks German" },
-            { de: "gern kocht", en: "who likes to cook" },
-            { de: "im Park joggt", en: "who jogs in the park" },
-            { de: "oft lacht", en: "who often laughs" },
-            { de: "viel liest", en: "who reads a lot" },
-            { de: "laut singt", en: "who sings loudly" },
-            { de: "früh aufsteht", en: "who gets up early" },
-        ],
-
-        main_predicates: [
-            { de: "ist nett", en: "is nice" },
-            { de: "ist lustig", en: "is funny" },
-            { de: "ist freundlich", en: "is friendly" },
-            { de: "ist intelligent", en: "is intelligent" },
-            { de: "ist sehr fleißig", en: "is very hard-working" },
-            { de: "kommt aus Deutschland", en: "comes from Germany" },
-        ],
-
-        // --- Konjunktiv II ---
-        wishes: [
-            { de: "Wenn ich reich wäre, würde ich reisen.", en: "If I were rich, I would travel." },
-            { de: "Wenn ich Zeit hätte, würde ich lesen.", en: "If I had time, I would read." },
-            { de: "Wenn es nicht regnen würde, würde ich spazieren gehen.", en: "If it weren't raining, I would go for a walk." },
-            { de: "Wenn ich Deutsch könnte, würde ich in Berlin arbeiten.", en: "If I could speak German, I would work in Berlin." },
-            { de: "Wenn ich ein Auto hätte, würde ich nach München fahren.", en: "If I had a car, I would drive to Munich." },
-            { de: "Wenn sie hier wäre, würde ich mich freuen.", en: "If she were here, I would be happy." },
-            { de: "Wenn wir Geld hätten, würden wir ein Haus kaufen.", en: "If we had money, we would buy a house." },
-            { de: "Wenn er schneller laufen könnte, würde er gewinnen.", en: "If he could run faster, he would win." },
-            { de: "Wenn du kommen könntest, wäre es toll.", en: "If you could come, that would be great." },
-            { de: "Wenn ich Arzt wäre, würde ich Menschen helfen.", en: "If I were a doctor, I would help people." },
-            { de: "Wenn das Wetter besser wäre, würden wir schwimmen gehen.", en: "If the weather were better, we would go swimming." },
-            { de: "Wenn ich kochen könnte, würde ich eine Suppe machen.", en: "If I could cook, I would make a soup." },
-        ],
-
-        polite_requests: [
-            { de: "Könntest du mir helfen?", en: "Could you help me?" },
-            { de: "Könnten Sie das wiederholen?", en: "Could you repeat that?" },
-            { de: "Würdest du das Fenster öffnen?", en: "Would you open the window?" },
-            { de: "Hätten Sie einen Moment Zeit?", en: "Would you have a moment?" },
-            { de: "Könnte ich bitte einen Kaffee haben?", en: "Could I please have a coffee?" },
-            { de: "Würden Sie mir bitte den Weg zeigen?", en: "Would you please show me the way?" },
-            { de: "Dürfte ich eine Frage stellen?", en: "May I ask a question?" },
-            { de: "Könntest du bitte leiser sein?", en: "Could you please be quieter?" },
-            { de: "Wäre es möglich, früher zu kommen?", en: "Would it be possible to come earlier?" },
-            { de: "Würdest du mir bitte das Salz geben?", en: "Would you please pass me the salt?" },
-        ],
-
-        // --- Advanced connectors (B2) ---
-        obwohl_sentences: [
-            { de: "Obwohl es regnet, gehe ich spazieren.", en: "Although it is raining, I go for a walk." },
-            { de: "Obwohl er müde ist, arbeitet er weiter.", en: "Although he is tired, he keeps working." },
-            { de: "Obwohl sie krank ist, geht sie zur Arbeit.", en: "Although she is sick, she goes to work." },
-            { de: "Obwohl das Essen teuer ist, bestellen wir es.", en: "Although the food is expensive, we order it." },
-            { de: "Obwohl ich keine Zeit habe, helfe ich dir.", en: "Although I have no time, I help you." },
-            { de: "Obwohl es spät ist, lernen wir weiter.", en: "Although it is late, we keep studying." },
-            { de: "Obwohl der Film lang ist, ist er spannend.", en: "Although the movie is long, it is exciting." },
-            { de: "Obwohl wir wenig Geld haben, reisen wir gern.", en: "Although we have little money, we like to travel." },
-            { de: "Obwohl das Wetter schlecht ist, spielen die Kinder draußen.", en: "Although the weather is bad, the children play outside." },
-            { de: "Obwohl ich Deutsch lerne, ist es schwer.", en: "Although I am learning German, it is hard." },
-        ],
-
-        trotzdem_sentences: [
-            { de: "Es regnet. Trotzdem gehe ich spazieren.", en: "It is raining. Nevertheless, I go for a walk." },
-            { de: "Er ist müde. Trotzdem arbeitet er weiter.", en: "He is tired. Nevertheless, he keeps working." },
-            { de: "Sie hat wenig Zeit. Trotzdem hilft sie mir.", en: "She has little time. Nevertheless, she helps me." },
-            { de: "Das Buch ist lang. Trotzdem lese ich es.", en: "The book is long. Nevertheless, I read it." },
-            { de: "Der Test ist schwer. Trotzdem versuche ich es.", en: "The test is hard. Nevertheless, I try." },
-            { de: "Wir sind spät dran. Trotzdem schaffen wir es.", en: "We are running late. Nevertheless, we make it." },
-            { de: "Ich bin krank. Trotzdem gehe ich zur Schule.", en: "I am sick. Nevertheless, I go to school." },
-            { de: "Es ist kalt. Trotzdem schwimmen wir.", en: "It is cold. Nevertheless, we swim." },
-        ],
-
-        indem_sentences: [
-            { de: "Man lernt, indem man viel liest.", en: "You learn by reading a lot." },
-            { de: "Man bleibt gesund, indem man Sport treibt.", en: "You stay healthy by doing sports." },
-            { de: "Man spart Geld, indem man weniger kauft.", en: "You save money by buying less." },
-            { de: "Man verbessert sich, indem man jeden Tag übt.", en: "You improve by practicing every day." },
-            { de: "Er hilft, indem er zuhört.", en: "He helps by listening." },
-            { de: "Sie lernt Deutsch, indem sie Filme schaut.", en: "She learns German by watching movies." },
-            { de: "Wir schützen die Umwelt, indem wir recyceln.", en: "We protect the environment by recycling." },
-            { de: "Man findet Freunde, indem man offen ist.", en: "You find friends by being open." },
-        ],
-
-        // --- Nominalization (B2) ---
-        nominalization: [
-            { de: "Das Lesen ist mein Hobby.", en: "Reading is my hobby." },
-            { de: "Das Schreiben fällt mir leicht.", en: "Writing is easy for me." },
-            { de: "Das Kochen macht Spaß.", en: "Cooking is fun." },
-            { de: "Das Reisen erweitert den Horizont.", en: "Travelling broadens the mind." },
-            { de: "Das Lernen erfordert Geduld.", en: "Learning requires patience." },
-            { de: "Das Schwimmen ist gesund.", en: "Swimming is healthy." },
-            { de: "Das Tanzen macht mich glücklich.", en: "Dancing makes me happy." },
-            { de: "Das Singen entspannt mich.", en: "Singing relaxes me." },
-            { de: "Das Wandern ist beliebt in Deutschland.", en: "Hiking is popular in Germany." },
-            { de: "Das Wichtigste ist die Gesundheit.", en: "The most important thing is health." },
-            { de: "Das Schöne daran ist die Natur.", en: "The beautiful thing about it is the nature." },
-            { de: "Das Beste kommt zum Schluss.", en: "The best comes at the end." },
-        ],
-
-        // Double infinitive
-        double_infinitive: [
-            { de: "Ich habe gestern arbeiten müssen.", en: "I had to work yesterday." },
-            { de: "Sie hat kommen können.", en: "She was able to come." },
-            { de: "Wir haben ins Kino gehen wollen.", en: "We wanted to go to the cinema." },
-            { de: "Er hat nicht fahren dürfen.", en: "He was not allowed to drive." },
-            { de: "Ich habe nicht lange warten müssen.", en: "I didn't have to wait long." },
-            { de: "Sie hat den Brief schreiben müssen.", en: "She had to write the letter." },
-            { de: "Er hat nicht schlafen können.", en: "He couldn't sleep." },
-            { de: "Wir haben heute früh aufstehen müssen.", en: "We had to get up early today." },
-            { de: "Ich habe das Buch lesen wollen.", en: "I wanted to read the book." },
-            { de: "Sie hat nicht kommen dürfen.", en: "She was not allowed to come." },
-            { de: "Er hat ihr helfen wollen.", en: "He wanted to help her." },
-            { de: "Ich habe es versuchen müssen.", en: "I had to try it." },
-        ],
-    };
-
     // ========== HELPER FUNCTIONS ==========
     function pick(arr) {
         return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function pickN(arr, n) {
-        const shuffled = [...arr].sort(() => Math.random() - 0.5);
-        return shuffled.slice(0, n);
     }
 
     function shuffleArray(arr) {
@@ -385,236 +20,1506 @@ const SentenceGenerator = (function () {
         return a;
     }
 
-    function enSubject(subj, verb_en, tense) {
-        if (tense === "present") {
-            if (subj.en === "He" || subj.en === "She") return subj.en + " " + verb_en + "s";
-            if (subj.en === "I") return "I " + verb_en;
-            return subj.en + " " + verb_en;
-        }
-        return subj.en + " " + verb_en;
-    }
+    // ========== A1 SENTENCES (300+) ==========
+    const a1_basic_word_order = [
+        // Daily activities
+        { de: "Ich trinke Kaffee.", en: "I drink coffee." },
+        { de: "Ich trinke Tee.", en: "I drink tea." },
+        { de: "Ich trinke Wasser.", en: "I drink water." },
+        { de: "Ich trinke Milch.", en: "I drink milk." },
+        { de: "Ich trinke Saft.", en: "I drink juice." },
+        { de: "Er trinkt Kaffee.", en: "He drinks coffee." },
+        { de: "Sie trinkt Tee.", en: "She drinks tea." },
+        { de: "Wir trinken Wasser.", en: "We drink water." },
+        { de: "Du trinkst Milch.", en: "You drink milk." },
+        { de: "Ich esse Brot.", en: "I eat bread." },
+        { de: "Ich esse einen Apfel.", en: "I eat an apple." },
+        { de: "Ich esse Suppe.", en: "I eat soup." },
+        { de: "Er isst Pizza.", en: "He eats pizza." },
+        { de: "Sie isst Salat.", en: "She eats salad." },
+        { de: "Wir essen Kuchen.", en: "We eat cake." },
+        { de: "Du isst Fleisch.", en: "You eat meat." },
+        { de: "Das Kind isst Eis.", en: "The child eats ice cream." },
+        { de: "Ich lese ein Buch.", en: "I read a book." },
+        { de: "Ich lese die Zeitung.", en: "I read the newspaper." },
+        { de: "Er liest ein Buch.", en: "He reads a book." },
+        { de: "Sie liest die Zeitung.", en: "She reads the newspaper." },
+        { de: "Wir lesen Bücher.", en: "We read books." },
+        { de: "Du liest gern.", en: "You like to read." },
+        { de: "Ich schreibe einen Brief.", en: "I write a letter." },
+        { de: "Er schreibt eine E-Mail.", en: "He writes an email." },
+        { de: "Sie schreibt eine Nachricht.", en: "She writes a message." },
+        { de: "Wir schreiben Briefe.", en: "We write letters." },
+        // Work and study
+        { de: "Ich arbeite heute.", en: "I work today." },
+        { de: "Ich arbeite morgen.", en: "I work tomorrow." },
+        { de: "Ich arbeite viel.", en: "I work a lot." },
+        { de: "Er arbeitet im Büro.", en: "He works in the office." },
+        { de: "Sie arbeitet zu Hause.", en: "She works at home." },
+        { de: "Wir arbeiten zusammen.", en: "We work together." },
+        { de: "Ich lerne Deutsch.", en: "I learn German." },
+        { de: "Ich lerne Englisch.", en: "I learn English." },
+        { de: "Er lernt Spanisch.", en: "He learns Spanish." },
+        { de: "Sie lernt Französisch.", en: "She learns French." },
+        { de: "Wir lernen jeden Tag.", en: "We learn every day." },
+        { de: "Du lernst schnell.", en: "You learn fast." },
+        // Movement
+        { de: "Ich gehe nach Hause.", en: "I go home." },
+        { de: "Ich gehe zur Schule.", en: "I go to school." },
+        { de: "Ich gehe zur Arbeit.", en: "I go to work." },
+        { de: "Ich gehe ins Kino.", en: "I go to the cinema." },
+        { de: "Er geht einkaufen.", en: "He goes shopping." },
+        { de: "Sie geht spazieren.", en: "She goes for a walk." },
+        { de: "Wir gehen ins Restaurant.", en: "We go to the restaurant." },
+        { de: "Du gehst nach links.", en: "You go left." },
+        { de: "Ich komme aus Deutschland.", en: "I come from Germany." },
+        { de: "Er kommt aus Berlin.", en: "He comes from Berlin." },
+        { de: "Sie kommt aus München.", en: "She comes from Munich." },
+        { de: "Wir kommen morgen.", en: "We come tomorrow." },
+        { de: "Ich laufe schnell.", en: "I run fast." },
+        { de: "Er läuft jeden Tag.", en: "He runs every day." },
+        { de: "Sie läuft im Park.", en: "She runs in the park." },
+        // Hobbies
+        { de: "Ich spiele Fußball.", en: "I play football." },
+        { de: "Ich spiele Tennis.", en: "I play tennis." },
+        { de: "Ich spiele Gitarre.", en: "I play guitar." },
+        { de: "Ich spiele Klavier.", en: "I play piano." },
+        { de: "Er spielt Basketball.", en: "He plays basketball." },
+        { de: "Sie spielt Volleyball.", en: "She plays volleyball." },
+        { de: "Wir spielen Karten.", en: "We play cards." },
+        { de: "Du spielst gut.", en: "You play well." },
+        { de: "Ich höre Musik.", en: "I listen to music." },
+        { de: "Er hört Radio.", en: "He listens to the radio." },
+        { de: "Sie hört gern Musik.", en: "She likes to listen to music." },
+        { de: "Ich singe ein Lied.", en: "I sing a song." },
+        { de: "Sie singt schön.", en: "She sings beautifully." },
+        { de: "Wir singen zusammen.", en: "We sing together." },
+        { de: "Ich tanze gern.", en: "I like to dance." },
+        { de: "Er tanzt gut.", en: "He dances well." },
+        { de: "Sie tanzt Salsa.", en: "She dances salsa." },
+        { de: "Ich schwimme gern.", en: "I like to swim." },
+        { de: "Er schwimmt im See.", en: "He swims in the lake." },
+        { de: "Sie schwimmt schnell.", en: "She swims fast." },
+        // Family
+        { de: "Meine Mutter kocht.", en: "My mother cooks." },
+        { de: "Mein Vater arbeitet.", en: "My father works." },
+        { de: "Meine Schwester lernt.", en: "My sister studies." },
+        { de: "Mein Bruder spielt.", en: "My brother plays." },
+        { de: "Meine Großmutter schläft.", en: "My grandmother sleeps." },
+        { de: "Mein Großvater liest.", en: "My grandfather reads." },
+        { de: "Die Familie isst.", en: "The family eats." },
+        { de: "Die Kinder spielen.", en: "The children play." },
+        // Shopping
+        { de: "Ich kaufe Brot.", en: "I buy bread." },
+        { de: "Ich kaufe Milch.", en: "I buy milk." },
+        { de: "Ich kaufe Äpfel.", en: "I buy apples." },
+        { de: "Er kauft ein Auto.", en: "He buys a car." },
+        { de: "Sie kauft Kleidung.", en: "She buys clothes." },
+        { de: "Wir kaufen Essen.", en: "We buy food." },
+        // Cooking
+        { de: "Ich koche Suppe.", en: "I cook soup." },
+        { de: "Ich koche Reis.", en: "I cook rice." },
+        { de: "Er kocht Pasta.", en: "He cooks pasta." },
+        { de: "Sie kocht Gemüse.", en: "She cooks vegetables." },
+        { de: "Wir kochen zusammen.", en: "We cook together." },
+        // Sleep and rest
+        { de: "Ich schlafe gut.", en: "I sleep well." },
+        { de: "Ich schlafe lange.", en: "I sleep long." },
+        { de: "Er schläft viel.", en: "He sleeps a lot." },
+        { de: "Sie schläft wenig.", en: "She sleeps little." },
+        { de: "Das Baby schläft.", en: "The baby sleeps." },
+    ];
 
-    const haben_conj = { "1s":"habe","2s":"hast","3s":"hat","1p":"haben","2p":"habt","3p":"haben" };
-    const sein_conj = { "1s":"bin","2s":"bist","3s":"ist","1p":"sind","2p":"seid","3p":"sind" };
+    const a1_simple_questions = [
+        // Personal information
+        { de: "Wie heißt du?", en: "What is your name?" },
+        { de: "Wie heißen Sie?", en: "What is your name? (formal)" },
+        { de: "Wie alt bist du?", en: "How old are you?" },
+        { de: "Wie alt sind Sie?", en: "How old are you? (formal)" },
+        { de: "Woher kommst du?", en: "Where do you come from?" },
+        { de: "Woher kommen Sie?", en: "Where do you come from? (formal)" },
+        { de: "Wo wohnst du?", en: "Where do you live?" },
+        { de: "Wo wohnen Sie?", en: "Where do you live? (formal)" },
+        { de: "Was machst du?", en: "What do you do?" },
+        { de: "Was machen Sie?", en: "What do you do? (formal)" },
+        { de: "Was ist dein Beruf?", en: "What is your job?" },
+        { de: "Was ist Ihr Beruf?", en: "What is your job? (formal)" },
+        // Location questions
+        { de: "Wo ist der Bahnhof?", en: "Where is the train station?" },
+        { de: "Wo ist die Toilette?", en: "Where is the toilet?" },
+        { de: "Wo ist das Hotel?", en: "Where is the hotel?" },
+        { de: "Wo ist der Supermarkt?", en: "Where is the supermarket?" },
+        { de: "Wo ist die Bank?", en: "Where is the bank?" },
+        { de: "Wo ist die Post?", en: "Where is the post office?" },
+        { de: "Wo ist das Restaurant?", en: "Where is the restaurant?" },
+        { de: "Wo ist die Apotheke?", en: "Where is the pharmacy?" },
+        { de: "Wo ist der Arzt?", en: "Where is the doctor?" },
+        { de: "Wo ist die Schule?", en: "Where is the school?" },
+        { de: "Wo ist der Park?", en: "Where is the park?" },
+        { de: "Wo ist das Krankenhaus?", en: "Where is the hospital?" },
+        // Price and cost
+        { de: "Was kostet das?", en: "How much does that cost?" },
+        { de: "Wie viel kostet das?", en: "How much is that?" },
+        { de: "Was kostet der Kaffee?", en: "How much does the coffee cost?" },
+        { de: "Was kostet das Brot?", en: "How much does the bread cost?" },
+        { de: "Ist das teuer?", en: "Is that expensive?" },
+        { de: "Ist das billig?", en: "Is that cheap?" },
+        // Time questions
+        { de: "Wie spät ist es?", en: "What time is it?" },
+        { de: "Wann kommst du?", en: "When are you coming?" },
+        { de: "Wann fährt der Zug?", en: "When does the train leave?" },
+        { de: "Wann öffnet das Geschäft?", en: "When does the store open?" },
+        { de: "Wann schließt das Museum?", en: "When does the museum close?" },
+        { de: "Wann beginnt der Film?", en: "When does the movie start?" },
+        { de: "Wann ist das Konzert?", en: "When is the concert?" },
+        { de: "Wann hast du Zeit?", en: "When do you have time?" },
+        // Yes/No questions
+        { de: "Sprichst du Deutsch?", en: "Do you speak German?" },
+        { de: "Sprechen Sie Englisch?", en: "Do you speak English? (formal)" },
+        { de: "Verstehst du mich?", en: "Do you understand me?" },
+        { de: "Hast du Zeit?", en: "Do you have time?" },
+        { de: "Haben Sie Zeit?", en: "Do you have time? (formal)" },
+        { de: "Hast du Hunger?", en: "Are you hungry?" },
+        { de: "Hast du Durst?", en: "Are you thirsty?" },
+        { de: "Bist du müde?", en: "Are you tired?" },
+        { de: "Ist das richtig?", en: "Is that correct?" },
+        { de: "Ist das falsch?", en: "Is that wrong?" },
+        { de: "Ist das gut?", en: "Is that good?" },
+        { de: "Magst du Kaffee?", en: "Do you like coffee?" },
+        { de: "Magst du Tee?", en: "Do you like tea?" },
+        { de: "Magst du Pizza?", en: "Do you like pizza?" },
+        { de: "Kannst du mir helfen?", en: "Can you help me?" },
+        { de: "Können Sie mir helfen?", en: "Can you help me? (formal)" },
+        { de: "Kannst du schwimmen?", en: "Can you swim?" },
+        { de: "Kannst du kochen?", en: "Can you cook?" },
+        { de: "Kannst du Auto fahren?", en: "Can you drive?" },
+        { de: "Gehst du heute aus?", en: "Are you going out today?" },
+        { de: "Kommst du mit?", en: "Are you coming along?" },
+        { de: "Arbeitest du morgen?", en: "Are you working tomorrow?" },
+        { de: "Lernst du Deutsch?", en: "Are you learning German?" },
+        // Why questions
+        { de: "Warum lernst du Deutsch?", en: "Why are you learning German?" },
+        { de: "Warum kommst du spät?", en: "Why are you coming late?" },
+        { de: "Warum bist du müde?", en: "Why are you tired?" },
+        { de: "Warum arbeitest du hier?", en: "Why do you work here?" },
+        // How questions
+        { de: "Wie geht es dir?", en: "How are you?" },
+        { de: "Wie geht es Ihnen?", en: "How are you? (formal)" },
+        { de: "Wie findest du das?", en: "How do you find that?" },
+        { de: "Wie schmeckt das?", en: "How does that taste?" },
+        { de: "Wie war dein Tag?", en: "How was your day?" },
+        { de: "Wie ist das Wetter?", en: "How is the weather?" },
+        { de: "Wie komme ich zum Bahnhof?", en: "How do I get to the train station?" },
+        { de: "Wie schreibt man das?", en: "How do you spell that?" },
+        { de: "Wie sagt man das auf Deutsch?", en: "How do you say that in German?" },
+        // What questions
+        { de: "Was ist das?", en: "What is that?" },
+        { de: "Was machst du heute?", en: "What are you doing today?" },
+        { de: "Was möchtest du essen?", en: "What would you like to eat?" },
+        { de: "Was möchtest du trinken?", en: "What would you like to drink?" },
+        { de: "Was studierst du?", en: "What do you study?" },
+        { de: "Was liest du?", en: "What are you reading?" },
+        { de: "Was kochst du?", en: "What are you cooking?" },
+        { de: "Was spielst du?", en: "What are you playing?" },
+    ];
+
+    const a1_negation = [
+        // kein/keine/keinen
+        { de: "Ich habe kein Auto.", en: "I don't have a car." },
+        { de: "Ich habe kein Geld.", en: "I don't have money." },
+        { de: "Ich habe keine Zeit.", en: "I don't have time." },
+        { de: "Ich habe keinen Hunger.", en: "I am not hungry." },
+        { de: "Ich habe keinen Durst.", en: "I am not thirsty." },
+        { de: "Ich habe keine Ahnung.", en: "I have no idea." },
+        { de: "Er hat kein Fahrrad.", en: "He doesn't have a bicycle." },
+        { de: "Er hat keine Schwester.", en: "He doesn't have a sister." },
+        { de: "Er hat keinen Bruder.", en: "He doesn't have a brother." },
+        { de: "Sie hat keine Kinder.", en: "She doesn't have children." },
+        { de: "Sie hat kein Handy.", en: "She doesn't have a phone." },
+        { de: "Wir haben kein Haus.", en: "We don't have a house." },
+        { de: "Wir haben keine Fragen.", en: "We don't have questions." },
+        { de: "Ich esse kein Fleisch.", en: "I don't eat meat." },
+        { de: "Ich esse keinen Fisch.", en: "I don't eat fish." },
+        { de: "Ich esse keine Süßigkeiten.", en: "I don't eat sweets." },
+        { de: "Er trinkt keinen Alkohol.", en: "He doesn't drink alcohol." },
+        { de: "Er trinkt keinen Kaffee.", en: "He doesn't drink coffee." },
+        { de: "Sie trinkt keine Milch.", en: "She doesn't drink milk." },
+        { de: "Ich spreche kein Französisch.", en: "I don't speak French." },
+        { de: "Er spricht kein Deutsch.", en: "He doesn't speak German." },
+        { de: "Es gibt kein Problem.", en: "There is no problem." },
+        { de: "Es gibt keine Lösung.", en: "There is no solution." },
+        { de: "Es gibt keinen Ausweg.", en: "There is no way out." },
+        // nicht
+        { de: "Ich verstehe das nicht.", en: "I don't understand that." },
+        { de: "Ich weiß das nicht.", en: "I don't know that." },
+        { de: "Ich sehe das nicht.", en: "I don't see that." },
+        { de: "Ich höre das nicht.", en: "I don't hear that." },
+        { de: "Er kommt heute nicht.", en: "He is not coming today." },
+        { de: "Er arbeitet heute nicht.", en: "He is not working today." },
+        { de: "Sie schläft noch nicht.", en: "She is not sleeping yet." },
+        { de: "Sie isst nicht viel.", en: "She doesn't eat much." },
+        { de: "Wir gehen heute nicht aus.", en: "We are not going out today." },
+        { de: "Wir fahren morgen nicht.", en: "We are not going tomorrow." },
+        { de: "Das funktioniert nicht.", en: "That doesn't work." },
+        { de: "Das stimmt nicht.", en: "That's not right." },
+        { de: "Das ist nicht richtig.", en: "That is not correct." },
+        { de: "Das ist nicht gut.", en: "That is not good." },
+        { de: "Das ist nicht schlecht.", en: "That is not bad." },
+        { de: "Das ist nicht teuer.", en: "That is not expensive." },
+        { de: "Das ist nicht billig.", en: "That is not cheap." },
+        { de: "Das schmeckt nicht gut.", en: "That doesn't taste good." },
+        { de: "Ich bin nicht müde.", en: "I am not tired." },
+        { de: "Ich bin nicht hungrig.", en: "I am not hungry." },
+        { de: "Ich bin nicht krank.", en: "I am not sick." },
+        { de: "Er ist nicht hier.", en: "He is not here." },
+        { de: "Sie ist nicht zu Hause.", en: "She is not at home." },
+        { de: "Wir sind nicht fertig.", en: "We are not done." },
+        { de: "Das Wetter ist nicht schön.", en: "The weather is not nice." },
+        { de: "Die Suppe ist nicht heiß.", en: "The soup is not hot." },
+        { de: "Der Kaffee ist nicht stark.", en: "The coffee is not strong." },
+        { de: "Ich mag das nicht.", en: "I don't like that." },
+        { de: "Er mag sie nicht.", en: "He doesn't like her." },
+        { de: "Sie mag ihn nicht.", en: "She doesn't like him." },
+        { de: "Ich kann das nicht.", en: "I can't do that." },
+        { de: "Er kann nicht schwimmen.", en: "He can't swim." },
+        { de: "Sie kann nicht kochen.", en: "She can't cook." },
+        { de: "Wir können nicht kommen.", en: "We can't come." },
+        { de: "Ich will das nicht.", en: "I don't want that." },
+        { de: "Er will nicht gehen.", en: "He doesn't want to go." },
+        { de: "Sie will nicht arbeiten.", en: "She doesn't want to work." },
+        { de: "Das muss nicht sein.", en: "That doesn't have to be." },
+        { de: "Du musst nicht bleiben.", en: "You don't have to stay." },
+        { de: "Er muss nicht kommen.", en: "He doesn't have to come." },
+        { de: "Das darf nicht sein.", en: "That can't be allowed." },
+        { de: "Du darfst hier nicht rauchen.", en: "You are not allowed to smoke here." },
+        { de: "Ich kenne ihn nicht.", en: "I don't know him." },
+        { de: "Ich kenne sie nicht.", en: "I don't know her." },
+        { de: "Wir kennen das nicht.", en: "We don't know that." },
+        { de: "Ich glaube das nicht.", en: "I don't believe that." },
+        { de: "Er versteht mich nicht.", en: "He doesn't understand me." },
+        { de: "Sie hört mich nicht.", en: "She doesn't hear me." },
+        { de: "Das gehört mir nicht.", en: "That doesn't belong to me." },
+        { de: "Das gefällt mir nicht.", en: "I don't like that." },
+    ];
+
+    const a1_sein_haben = [
+        // sein - present tense
+        { de: "Ich bin müde.", en: "I am tired." },
+        { de: "Ich bin hungrig.", en: "I am hungry." },
+        { de: "Ich bin durstig.", en: "I am thirsty." },
+        { de: "Ich bin glücklich.", en: "I am happy." },
+        { de: "Ich bin traurig.", en: "I am sad." },
+        { de: "Ich bin krank.", en: "I am sick." },
+        { de: "Ich bin gesund.", en: "I am healthy." },
+        { de: "Ich bin Student.", en: "I am a student." },
+        { de: "Ich bin Lehrer.", en: "I am a teacher." },
+        { de: "Ich bin Arzt.", en: "I am a doctor." },
+        { de: "Ich bin hier.", en: "I am here." },
+        { de: "Ich bin zu Hause.", en: "I am at home." },
+        { de: "Ich bin in Berlin.", en: "I am in Berlin." },
+        { de: "Ich bin aus Deutschland.", en: "I am from Germany." },
+        { de: "Ich bin 25 Jahre alt.", en: "I am 25 years old." },
+        { de: "Du bist nett.", en: "You are nice." },
+        { de: "Du bist freundlich.", en: "You are friendly." },
+        { de: "Du bist intelligent.", en: "You are intelligent." },
+        { de: "Du bist lustig.", en: "You are funny." },
+        { de: "Du bist jung.", en: "You are young." },
+        { de: "Du bist schön.", en: "You are beautiful." },
+        { de: "Er ist groß.", en: "He is tall." },
+        { de: "Er ist klein.", en: "He is short." },
+        { de: "Er ist alt.", en: "He is old." },
+        { de: "Er ist stark.", en: "He is strong." },
+        { de: "Er ist schnell.", en: "He is fast." },
+        { de: "Er ist langsam.", en: "He is slow." },
+        { de: "Sie ist schön.", en: "She is beautiful." },
+        { de: "Sie ist klug.", en: "She is smart." },
+        { de: "Sie ist fleißig.", en: "She is hardworking." },
+        { de: "Sie ist nett.", en: "She is nice." },
+        { de: "Wir sind Freunde.", en: "We are friends." },
+        { de: "Wir sind Familie.", en: "We are family." },
+        { de: "Wir sind fertig.", en: "We are done." },
+        { de: "Wir sind bereit.", en: "We are ready." },
+        { de: "Wir sind hier.", en: "We are here." },
+        { de: "Sie sind freundlich.", en: "They are friendly." },
+        { de: "Das ist gut.", en: "That is good." },
+        { de: "Das ist schlecht.", en: "That is bad." },
+        { de: "Das ist schön.", en: "That is beautiful." },
+        { de: "Das ist interessant.", en: "That is interesting." },
+        { de: "Das ist richtig.", en: "That is correct." },
+        { de: "Das ist falsch.", en: "That is wrong." },
+        { de: "Das ist wichtig.", en: "That is important." },
+        { de: "Es ist kalt.", en: "It is cold." },
+        { de: "Es ist warm.", en: "It is warm." },
+        { de: "Es ist heiß.", en: "It is hot." },
+        { de: "Es ist spät.", en: "It is late." },
+        { de: "Es ist früh.", en: "It is early." },
+        { de: "Das Wetter ist schön.", en: "The weather is nice." },
+        { de: "Der Kaffee ist heiß.", en: "The coffee is hot." },
+        { de: "Das Essen ist gut.", en: "The food is good." },
+        { de: "Die Suppe ist lecker.", en: "The soup is delicious." },
+        { de: "Das Buch ist interessant.", en: "The book is interesting." },
+        { de: "Der Film ist lang.", en: "The movie is long." },
+        { de: "Die Stadt ist groß.", en: "The city is big." },
+        { de: "Das Kind ist klein.", en: "The child is small." },
+        { de: "Der Mann ist alt.", en: "The man is old." },
+        { de: "Die Frau ist jung.", en: "The woman is young." },
+        // haben - present tense
+        { de: "Ich habe eine Frage.", en: "I have a question." },
+        { de: "Ich habe ein Problem.", en: "I have a problem." },
+        { de: "Ich habe eine Idee.", en: "I have an idea." },
+        { de: "Ich habe Zeit.", en: "I have time." },
+        { de: "Ich habe Hunger.", en: "I am hungry." },
+        { de: "Ich habe Durst.", en: "I am thirsty." },
+        { de: "Ich habe Angst.", en: "I am afraid." },
+        { de: "Ich habe Glück.", en: "I am lucky." },
+        { de: "Ich habe Pech.", en: "I am unlucky." },
+        { de: "Ich habe einen Hund.", en: "I have a dog." },
+        { de: "Ich habe eine Katze.", en: "I have a cat." },
+        { de: "Ich habe ein Auto.", en: "I have a car." },
+        { de: "Ich habe ein Fahrrad.", en: "I have a bicycle." },
+        { de: "Ich habe ein Haus.", en: "I have a house." },
+        { de: "Ich habe einen Bruder.", en: "I have a brother." },
+        { de: "Ich habe eine Schwester.", en: "I have a sister." },
+        { de: "Ich habe zwei Kinder.", en: "I have two children." },
+        { de: "Du hast Recht.", en: "You are right." },
+        { de: "Du hast Zeit.", en: "You have time." },
+        { de: "Du hast ein Handy.", en: "You have a phone." },
+        { de: "Er hat Geld.", en: "He has money." },
+        { de: "Er hat Arbeit.", en: "He has work." },
+        { de: "Er hat einen Job.", en: "He has a job." },
+        { de: "Sie hat Talent.", en: "She has talent." },
+        { de: "Sie hat Erfahrung.", en: "She has experience." },
+        { de: "Sie hat viele Freunde.", en: "She has many friends." },
+        { de: "Wir haben ein Problem.", en: "We have a problem." },
+        { de: "Wir haben Zeit.", en: "We have time." },
+        { de: "Wir haben Glück.", en: "We are lucky." },
+        { de: "Das Haus hat einen Garten.", en: "The house has a garden." },
+        { de: "Die Wohnung hat drei Zimmer.", en: "The apartment has three rooms." },
+        { de: "Der Hund hat Hunger.", en: "The dog is hungry." },
+        { de: "Die Katze hat Durst.", en: "The cat is thirsty." },
+    ];
+
+    // A1 Continuation - more basic sentences
+    const a1_basic_extra = [
+        { de: "Ich wohne in Berlin.", en: "I live in Berlin." },
+        { de: "Ich wohne in Deutschland.", en: "I live in Germany." },
+        { de: "Er wohnt in München.", en: "He lives in Munich." },
+        { de: "Sie wohnt in Hamburg.", en: "She lives in Hamburg." },
+        { de: "Wir wohnen in einer Wohnung.", en: "We live in an apartment." },
+        { de: "Ich mag Schokolade.", en: "I like chocolate." },
+        { de: "Ich mag Obst.", en: "I like fruit." },
+        { de: "Er mag Fußball.", en: "He likes football." },
+        { de: "Sie mag Musik.", en: "She likes music." },
+        { de: "Ich verstehe Deutsch.", en: "I understand German." },
+        { de: "Du verstehst mich.", en: "You understand me." },
+        { de: "Er versteht alles.", en: "He understands everything." },
+        { de: "Ich brauche Hilfe.", en: "I need help." },
+        { de: "Ich brauche Wasser.", en: "I need water." },
+        { de: "Er braucht ein Auto.", en: "He needs a car." },
+        { de: "Sie braucht Zeit.", en: "She needs time." },
+        { de: "Ich suche meine Schlüssel.", en: "I am looking for my keys." },
+        { de: "Er sucht eine Wohnung.", en: "He is looking for an apartment." },
+        { de: "Sie sucht Arbeit.", en: "She is looking for work." },
+        { de: "Ich finde das gut.", en: "I think that is good." },
+        { de: "Er findet das interessant.", en: "He finds that interesting." },
+        { de: "Sie findet das langweilig.", en: "She finds that boring." },
+        { de: "Ich spreche Deutsch.", en: "I speak German." },
+        { de: "Er spricht Englisch.", en: "He speaks English." },
+        { de: "Sie spricht drei Sprachen.", en: "She speaks three languages." },
+        { de: "Ich nehme den Bus.", en: "I take the bus." },
+        { de: "Er nimmt den Zug.", en: "He takes the train." },
+        { de: "Sie nimmt ein Taxi.", en: "She takes a taxi." },
+        { de: "Ich gebe dir das Buch.", en: "I give you the book." },
+        { de: "Er gibt mir das Geld.", en: "He gives me the money." },
+        { de: "Ich helfe dir.", en: "I help you." },
+        { de: "Er hilft mir.", en: "He helps me." },
+        { de: "Sie hilft uns.", en: "She helps us." },
+        { de: "Ich liebe meine Familie.", en: "I love my family." },
+        { de: "Er liebt Musik.", en: "He loves music." },
+        { de: "Sie liebt ihn.", en: "She loves him." },
+        { de: "Ich fahre Auto.", en: "I drive a car." },
+        { de: "Er fährt Fahrrad.", en: "He rides a bicycle." },
+        { de: "Sie fährt nach Berlin.", en: "She goes to Berlin." },
+        { de: "Der Zug fährt ab.", en: "The train departs." },
+        { de: "Das Flugzeug fliegt.", en: "The plane flies." },
+        { de: "Der Vogel singt.", en: "The bird sings." },
+        { de: "Die Sonne scheint.", en: "The sun shines." },
+        { de: "Der Wind weht.", en: "The wind blows." },
+        { de: "Es schneit.", en: "It is snowing." },
+        { de: "Es regnet.", en: "It is raining." },
+        { de: "Das Wasser ist kalt.", en: "The water is cold." },
+        { de: "Das Essen ist warm.", en: "The food is warm." },
+        { de: "Der Kaffee schmeckt gut.", en: "The coffee tastes good." },
+        { de: "Der Kuchen ist lecker.", en: "The cake is delicious." },
+    ];
+
+    // ========== A2 SENTENCES (300+) ==========
+    const a2_past_tense_perfekt = [
+        // haben + Partizip II
+        { de: "Ich habe Kaffee getrunken.", en: "I drank coffee." },
+        { de: "Ich habe Tee getrunken.", en: "I drank tea." },
+        { de: "Ich habe Wasser getrunken.", en: "I drank water." },
+        { de: "Ich habe ein Buch gelesen.", en: "I read a book." },
+        { de: "Ich habe die Zeitung gelesen.", en: "I read the newspaper." },
+        { de: "Ich habe einen Brief geschrieben.", en: "I wrote a letter." },
+        { de: "Ich habe eine E-Mail geschrieben.", en: "I wrote an email." },
+        { de: "Ich habe Suppe gekocht.", en: "I cooked soup." },
+        { de: "Ich habe das Essen gekocht.", en: "I cooked the food." },
+        { de: "Ich habe Pasta gekocht.", en: "I cooked pasta." },
+        { de: "Ich habe einen Apfel gegessen.", en: "I ate an apple." },
+        { de: "Ich habe Pizza gegessen.", en: "I ate pizza." },
+        { de: "Ich habe Kuchen gegessen.", en: "I ate cake." },
+        { de: "Ich habe Brot gekauft.", en: "I bought bread." },
+        { de: "Ich habe Milch gekauft.", en: "I bought milk." },
+        { de: "Ich habe ein Geschenk gekauft.", en: "I bought a gift." },
+        { de: "Ich habe Kleidung gekauft.", en: "I bought clothes." },
+        { de: "Ich habe gut geschlafen.", en: "I slept well." },
+        { de: "Ich habe lange geschlafen.", en: "I slept for a long time." },
+        { de: "Ich habe Musik gehört.", en: "I listened to music." },
+        { de: "Ich habe Radio gehört.", en: "I listened to the radio." },
+        { de: "Ich habe Fußball gespielt.", en: "I played football." },
+        { de: "Ich habe Tennis gespielt.", en: "I played tennis." },
+        { de: "Ich habe Gitarre gespielt.", en: "I played guitar." },
+        { de: "Ich habe viel gearbeitet.", en: "I worked a lot." },
+        { de: "Ich habe Deutsch gelernt.", en: "I learned German." },
+        { de: "Ich habe ihn gesehen.", en: "I saw him." },
+        { de: "Ich habe sie getroffen.", en: "I met her." },
+        { de: "Ich habe ihm geholfen.", en: "I helped him." },
+        { de: "Ich habe ihr danke gesagt.", en: "I thanked her." },
+        { de: "Er hat einen Film gesehen.", en: "He watched a movie." },
+        { de: "Er hat das Buch gelesen.", en: "He read the book." },
+        { de: "Er hat viel gearbeitet.", en: "He worked a lot." },
+        { de: "Er hat lange geschlafen.", en: "He slept for a long time." },
+        { de: "Er hat mir geholfen.", en: "He helped me." },
+        { de: "Sie hat Musik gehört.", en: "She listened to music." },
+        { de: "Sie hat das Essen gekocht.", en: "She cooked the food." },
+        { de: "Sie hat einen Brief geschrieben.", en: "She wrote a letter." },
+        { de: "Sie hat den Kuchen gebacken.", en: "She baked the cake." },
+        { de: "Wir haben zusammen gegessen.", en: "We ate together." },
+        { de: "Wir haben viel gelacht.", en: "We laughed a lot." },
+        { de: "Wir haben lange geredet.", en: "We talked for a long time." },
+        { de: "Wir haben Karten gespielt.", en: "We played cards." },
+        // sein + Partizip II
+        { de: "Ich bin nach Berlin gefahren.", en: "I went to Berlin." },
+        { de: "Ich bin nach München gefahren.", en: "I went to Munich." },
+        { de: "Ich bin nach Hause gegangen.", en: "I went home." },
+        { de: "Ich bin ins Kino gegangen.", en: "I went to the cinema." },
+        { de: "Ich bin einkaufen gegangen.", en: "I went shopping." },
+        { de: "Ich bin spazieren gegangen.", en: "I went for a walk." },
+        { de: "Ich bin früh aufgestanden.", en: "I got up early." },
+        { de: "Ich bin spät aufgestanden.", en: "I got up late." },
+        { de: "Ich bin schnell gelaufen.", en: "I ran fast." },
+        { de: "Ich bin gestern angekommen.", en: "I arrived yesterday." },
+        { de: "Ich bin nach Deutschland geflogen.", en: "I flew to Germany." },
+        { de: "Ich bin im See geschwommen.", en: "I swam in the lake." },
+        { de: "Er ist nach Hause gegangen.", en: "He went home." },
+        { de: "Er ist zur Arbeit gefahren.", en: "He went to work." },
+        { de: "Er ist früh gekommen.", en: "He came early." },
+        { de: "Er ist spät gekommen.", en: "He came late." },
+        { de: "Sie ist eingeschlafen.", en: "She fell asleep." },
+        { de: "Sie ist aufgewacht.", en: "She woke up." },
+        { de: "Wir sind nach Italien gereist.", en: "We traveled to Italy." },
+        { de: "Wir sind gewandert.", en: "We went hiking." },
+        { de: "Wir sind Ski gefahren.", en: "We went skiing." },
+        { de: "Der Zug ist abgefahren.", en: "The train departed." },
+        { de: "Das Flugzeug ist gelandet.", en: "The plane landed." },
+        { de: "Die Blumen sind gewachsen.", en: "The flowers grew." },
+        { de: "Das Kind ist groß geworden.", en: "The child grew up." },
+        { de: "Der Film ist um 8 Uhr angefangen.", en: "The movie started at 8." },
+        { de: "Das Konzert ist vorbei.", en: "The concert is over." },
+        { de: "Was ist passiert?", en: "What happened?" },
+        { de: "Nichts ist passiert.", en: "Nothing happened." },
+        { de: "Es ist kalt geworden.", en: "It got cold." },
+        { de: "Es ist spät geworden.", en: "It got late." },
+    ];
+
+    const a2_modal_verbs = [
+        // können (can)
+        { de: "Ich kann Deutsch sprechen.", en: "I can speak German." },
+        { de: "Ich kann schwimmen.", en: "I can swim." },
+        { de: "Ich kann kochen.", en: "I can cook." },
+        { de: "Ich kann Auto fahren.", en: "I can drive." },
+        { de: "Ich kann Gitarre spielen.", en: "I can play guitar." },
+        { de: "Ich kann gut singen.", en: "I can sing well." },
+        { de: "Ich kann dir helfen.", en: "I can help you." },
+        { de: "Ich kann nicht kommen.", en: "I can't come." },
+        { de: "Ich kann das nicht machen.", en: "I can't do that." },
+        { de: "Kannst du mir helfen?", en: "Can you help me?" },
+        { de: "Kannst du das wiederholen?", en: "Can you repeat that?" },
+        { de: "Kannst du langsamer sprechen?", en: "Can you speak slower?" },
+        { de: "Er kann sehr gut tanzen.", en: "He can dance very well." },
+        { de: "Sie kann drei Sprachen sprechen.", en: "She can speak three languages." },
+        { de: "Wir können morgen kommen.", en: "We can come tomorrow." },
+        // müssen (must/have to)
+        { de: "Ich muss arbeiten.", en: "I have to work." },
+        { de: "Ich muss lernen.", en: "I have to study." },
+        { de: "Ich muss gehen.", en: "I have to go." },
+        { de: "Ich muss schlafen.", en: "I have to sleep." },
+        { de: "Ich muss zum Arzt gehen.", en: "I have to go to the doctor." },
+        { de: "Ich muss einkaufen gehen.", en: "I have to go shopping." },
+        { de: "Ich muss das machen.", en: "I have to do that." },
+        { de: "Du musst früh aufstehen.", en: "You have to get up early." },
+        { de: "Du musst mehr schlafen.", en: "You have to sleep more." },
+        { de: "Er muss zur Arbeit gehen.", en: "He has to go to work." },
+        { de: "Sie muss die Hausaufgaben machen.", en: "She has to do the homework." },
+        { de: "Wir müssen das besprechen.", en: "We have to discuss that." },
+        { de: "Wir müssen jetzt gehen.", en: "We have to go now." },
+        { de: "Muss ich das machen?", en: "Do I have to do that?" },
+        // wollen (want to)
+        { de: "Ich will nach Deutschland reisen.", en: "I want to travel to Germany." },
+        { de: "Ich will Deutsch lernen.", en: "I want to learn German." },
+        { de: "Ich will ins Kino gehen.", en: "I want to go to the cinema." },
+        { de: "Ich will Pizza essen.", en: "I want to eat pizza." },
+        { de: "Ich will fernsehen.", en: "I want to watch TV." },
+        { de: "Ich will schlafen.", en: "I want to sleep." },
+        { de: "Was willst du machen?", en: "What do you want to do?" },
+        { de: "Was willst du essen?", en: "What do you want to eat?" },
+        { de: "Er will ein Auto kaufen.", en: "He wants to buy a car." },
+        { de: "Sie will Ärztin werden.", en: "She wants to become a doctor." },
+        { de: "Wir wollen zusammen kochen.", en: "We want to cook together." },
+        { de: "Willst du mitkommen?", en: "Do you want to come along?" },
+        // sollen (should)
+        { de: "Ich soll mehr Sport machen.", en: "I should do more sports." },
+        { de: "Ich soll früher schlafen.", en: "I should sleep earlier." },
+        { de: "Ich soll weniger Zucker essen.", en: "I should eat less sugar." },
+        { de: "Du sollst mehr Wasser trinken.", en: "You should drink more water." },
+        { de: "Du sollst nicht so viel arbeiten.", en: "You shouldn't work so much." },
+        { de: "Er soll pünktlich sein.", en: "He should be on time." },
+        { de: "Was soll ich machen?", en: "What should I do?" },
+        { de: "Was soll ich sagen?", en: "What should I say?" },
+        { de: "Soll ich dir helfen?", en: "Should I help you?" },
+        { de: "Soll ich das Fenster öffnen?", en: "Should I open the window?" },
+        // dürfen (may/be allowed to)
+        { de: "Ich darf hier nicht rauchen.", en: "I am not allowed to smoke here." },
+        { de: "Ich darf nicht Auto fahren.", en: "I am not allowed to drive." },
+        { de: "Darf ich eine Frage stellen?", en: "May I ask a question?" },
+        { de: "Darf ich hier sitzen?", en: "May I sit here?" },
+        { de: "Darf ich das Fenster öffnen?", en: "May I open the window?" },
+        { de: "Darf ich reinkommen?", en: "May I come in?" },
+        { de: "Darf ich hier fotografieren?", en: "May I take photos here?" },
+        { de: "Er darf nicht fernsehen.", en: "He is not allowed to watch TV." },
+        { de: "Die Kinder dürfen spielen.", en: "The children are allowed to play." },
+        // möchten (would like)
+        { de: "Ich möchte einen Kaffee.", en: "I would like a coffee." },
+        { de: "Ich möchte ein Bier.", en: "I would like a beer." },
+        { de: "Ich möchte die Rechnung.", en: "I would like the bill." },
+        { de: "Ich möchte bestellen.", en: "I would like to order." },
+        { de: "Ich möchte bezahlen.", en: "I would like to pay." },
+        { de: "Was möchtest du trinken?", en: "What would you like to drink?" },
+        { de: "Was möchten Sie essen?", en: "What would you like to eat?" },
+        { de: "Möchtest du mitkommen?", en: "Would you like to come along?" },
+        { de: "Möchten Sie Zucker?", en: "Would you like sugar?" },
+    ];
+
+    const a2_connectors_weil_dass = [
+        // weil (because) - verb at end
+        { de: "Ich bleibe zu Hause, weil ich krank bin.", en: "I stay at home because I am sick." },
+        { de: "Ich bleibe zu Hause, weil es regnet.", en: "I stay at home because it is raining." },
+        { de: "Ich bin müde, weil ich wenig geschlafen habe.", en: "I am tired because I slept little." },
+        { de: "Ich lerne Deutsch, weil ich in Deutschland arbeiten will.", en: "I learn German because I want to work in Germany." },
+        { de: "Ich esse nicht, weil ich keinen Hunger habe.", en: "I don't eat because I'm not hungry." },
+        { de: "Er kommt spät, weil er viel Arbeit hat.", en: "He comes late because he has a lot of work." },
+        { de: "Er ist glücklich, weil er verliebt ist.", en: "He is happy because he is in love." },
+        { de: "Sie weint, weil sie traurig ist.", en: "She cries because she is sad." },
+        { de: "Sie lacht, weil der Film lustig ist.", en: "She laughs because the movie is funny." },
+        { de: "Wir gehen nicht aus, weil wir kein Geld haben.", en: "We don't go out because we don't have money." },
+        { de: "Wir sind müde, weil wir viel gearbeitet haben.", en: "We are tired because we worked a lot." },
+        { de: "Ich mag ihn, weil er nett ist.", en: "I like him because he is nice." },
+        { de: "Ich mag dieses Restaurant, weil das Essen gut ist.", en: "I like this restaurant because the food is good." },
+        { de: "Ich kann nicht kommen, weil ich arbeiten muss.", en: "I can't come because I have to work." },
+        { de: "Er spricht gut Deutsch, weil er in Deutschland gelebt hat.", en: "He speaks German well because he lived in Germany." },
+        { de: "Sie ist dünn, weil sie viel Sport macht.", en: "She is thin because she does a lot of sports." },
+        { de: "Das Kind weint, weil es Hunger hat.", en: "The child cries because it is hungry." },
+        { de: "Ich nehme ein Taxi, weil ich spät dran bin.", en: "I take a taxi because I am running late." },
+        { de: "Er trinkt keinen Alkohol, weil er Auto fahren muss.", en: "He doesn't drink alcohol because he has to drive." },
+        { de: "Sie liegt im Bett, weil sie krank ist.", en: "She is in bed because she is sick." },
+        // dass (that) - verb at end
+        { de: "Ich denke, dass er nett ist.", en: "I think that he is nice." },
+        { de: "Ich denke, dass sie Recht hat.", en: "I think that she is right." },
+        { de: "Ich glaube, dass es morgen regnet.", en: "I believe that it will rain tomorrow." },
+        { de: "Ich glaube, dass er kommt.", en: "I believe that he is coming." },
+        { de: "Ich weiß, dass du Deutsch lernst.", en: "I know that you are learning German." },
+        { de: "Ich weiß, dass er in Berlin wohnt.", en: "I know that he lives in Berlin." },
+        { de: "Ich hoffe, dass du bald kommst.", en: "I hope that you come soon." },
+        { de: "Ich hoffe, dass das Wetter schön wird.", en: "I hope that the weather will be nice." },
+        { de: "Ich freue mich, dass du hier bist.", en: "I'm glad that you are here." },
+        { de: "Ich freue mich, dass du kommst.", en: "I'm glad that you are coming." },
+        { de: "Es ist wichtig, dass du pünktlich bist.", en: "It is important that you are on time." },
+        { de: "Es ist gut, dass du hier bist.", en: "It is good that you are here." },
+        { de: "Es ist schade, dass er nicht kommt.", en: "It is a pity that he is not coming." },
+        { de: "Er sagt, dass er morgen kommt.", en: "He says that he is coming tomorrow." },
+        { de: "Er sagt, dass er keine Zeit hat.", en: "He says that he has no time." },
+        { de: "Sie meint, dass das richtig ist.", en: "She thinks that is correct." },
+        { de: "Sie erzählt, dass sie in München wohnt.", en: "She says that she lives in Munich." },
+        { de: "Ich finde, dass das Essen gut schmeckt.", en: "I think that the food tastes good." },
+        { de: "Ich finde, dass der Film langweilig ist.", en: "I think that the movie is boring." },
+        { de: "Weißt du, dass er verheiratet ist?", en: "Do you know that he is married?" },
+        { de: "Hast du gehört, dass sie umgezogen ist?", en: "Did you hear that she moved?" },
+        { de: "Es stimmt, dass er krank ist.", en: "It is true that he is sick." },
+        { de: "Es ist klar, dass wir ein Problem haben.", en: "It is clear that we have a problem." },
+        { de: "Ich bin sicher, dass alles gut wird.", en: "I am sure that everything will be fine." },
+        { de: "Ich bleibe zu Hause, weil das Wetter schlecht ist.", en: "I stay at home because the weather is bad." },
+        { de: "Er ist spät, weil der Zug Verspätung hatte.", en: "He is late because the train was delayed." },
+        { de: "Sie lernt viel, weil sie eine Prüfung hat.", en: "She studies a lot because she has an exam." },
+        { de: "Wir sind glücklich, weil wir zusammen sind.", en: "We are happy because we are together." },
+        { de: "Ich weiß, dass das nicht leicht ist.", en: "I know that this is not easy." },
+        { de: "Ich hoffe, dass es dir gut geht.", en: "I hope that you are doing well." },
+        { de: "Er sagt, dass er morgen frei hat.", en: "He says that he is free tomorrow." },
+        { de: "Sie glaubt, dass das möglich ist.", en: "She believes that is possible." },
+        { de: "Ich bin froh, weil das Wochenende kommt.", en: "I am happy because the weekend is coming." },
+        { de: "Er arbeitet hart, weil er Erfolg haben will.", en: "He works hard because he wants to succeed." },
+        { de: "Sie ist müde, weil sie die ganze Nacht gearbeitet hat.", en: "She is tired because she worked all night." },
+        { de: "Ich glaube, dass er Recht hat.", en: "I believe that he is right." },
+        { de: "Es ist möglich, dass sie kommt.", en: "It is possible that she comes." },
+        { de: "Ich denke, dass wir Erfolg haben werden.", en: "I think that we will succeed." },
+        { de: "Er erwähnt, dass er bald umzieht.", en: "He mentions that he is moving soon." },
+        { de: "Ich bin überrascht, dass du hier bist.", en: "I am surprised that you are here." },
+        { de: "Wir wissen, dass ihr fleißig arbeitet.", en: "We know that you work hard." },
+        { de: "Sie fragt, ob wir Zeit haben.", en: "She asks if we have time." },
+        { de: "Er will wissen, wann der Film anfängt.", en: "He wants to know when the movie starts." },
+        { de: "Ich frage mich, ob das stimmt.", en: "I wonder if that is true." },
+        { de: "Sie sagt, dass sie mich liebt.", en: "She says that she loves me." },
+        { de: "Er erklärt, dass er nicht kommen kann.", en: "He explains that he cannot come." },
+        { de: "Ich lerne, weil ich besser werden will.", en: "I learn because I want to get better." },
+        { de: "Er schläft, weil er müde ist.", en: "He sleeps because he is tired." },
+        { de: "Sie weint nicht, weil sie stark ist.", en: "She doesn't cry because she is strong." },
+    ];
+
+    const a2_separable = [
+        // aufstehen (to get up)
+        { de: "Ich stehe um 7 Uhr auf.", en: "I get up at 7 o'clock." },
+        { de: "Ich stehe früh auf.", en: "I get up early." },
+        { de: "Ich stehe spät auf.", en: "I get up late." },
+        { de: "Wann stehst du auf?", en: "When do you get up?" },
+        { de: "Er steht jeden Tag um 6 Uhr auf.", en: "He gets up at 6 every day." },
+        // anrufen (to call)
+        { de: "Ich rufe dich später an.", en: "I'll call you later." },
+        { de: "Ich rufe meine Mutter an.", en: "I call my mother." },
+        { de: "Rufst du mich morgen an?", en: "Will you call me tomorrow?" },
+        { de: "Er ruft seinen Freund an.", en: "He calls his friend." },
+        { de: "Sie ruft das Restaurant an.", en: "She calls the restaurant." },
+        // einkaufen (to shop)
+        { de: "Ich kaufe im Supermarkt ein.", en: "I shop at the supermarket." },
+        { de: "Ich kaufe heute ein.", en: "I go shopping today." },
+        { de: "Gehst du einkaufen?", en: "Are you going shopping?" },
+        { de: "Wir kaufen zusammen ein.", en: "We shop together." },
+        // anfangen (to start/begin)
+        { de: "Der Film fängt um 8 Uhr an.", en: "The movie starts at 8 o'clock." },
+        { de: "Die Schule fängt um 9 an.", en: "School starts at 9." },
+        { de: "Wann fängt das Konzert an?", en: "When does the concert start?" },
+        { de: "Ich fange morgen an.", en: "I start tomorrow." },
+        // aufhören (to stop)
+        { de: "Ich höre um 5 Uhr auf.", en: "I stop at 5 o'clock." },
+        { de: "Hör auf zu reden!", en: "Stop talking!" },
+        { de: "Wann hörst du auf zu arbeiten?", en: "When do you stop working?" },
+        { de: "Der Regen hört auf.", en: "The rain stops." },
+        // aufräumen (to clean up)
+        { de: "Ich räume mein Zimmer auf.", en: "I clean up my room." },
+        { de: "Räum dein Zimmer auf!", en: "Clean up your room!" },
+        { de: "Sie räumt die Küche auf.", en: "She cleans up the kitchen." },
+        // anziehen (to put on)
+        { de: "Ich ziehe meine Jacke an.", en: "I put on my jacket." },
+        { de: "Ich ziehe mich an.", en: "I get dressed." },
+        { de: "Zieh dich warm an!", en: "Dress warmly!" },
+        { de: "Er zieht seinen Mantel an.", en: "He puts on his coat." },
+        // ausziehen (to take off)
+        { de: "Ich ziehe meine Schuhe aus.", en: "I take off my shoes." },
+        { de: "Ich ziehe mich aus.", en: "I get undressed." },
+        { de: "Zieh deine Jacke aus!", en: "Take off your jacket!" },
+        // zumachen (to close)
+        { de: "Ich mache das Fenster zu.", en: "I close the window." },
+        { de: "Ich mache die Tür zu.", en: "I close the door." },
+        { de: "Mach die Tür zu!", en: "Close the door!" },
+        // aufmachen (to open)
+        { de: "Ich mache das Fenster auf.", en: "I open the window." },
+        { de: "Ich mache die Tür auf.", en: "I open the door." },
+        { de: "Mach bitte die Tür auf!", en: "Please open the door!" },
+        // einladen (to invite)
+        { de: "Ich lade dich zum Essen ein.", en: "I invite you to dinner." },
+        { de: "Ich lade meine Freunde ein.", en: "I invite my friends." },
+        { de: "Er lädt uns zur Party ein.", en: "He invites us to the party." },
+        // mitnehmen (to take along)
+        { de: "Ich nehme meinen Regenschirm mit.", en: "I take my umbrella with me." },
+        { de: "Nimmst du mich mit?", en: "Will you take me with you?" },
+        { de: "Er nimmt seine Tasche mit.", en: "He takes his bag with him." },
+        // zurückkommen (to come back)
+        { de: "Ich komme um 6 Uhr zurück.", en: "I come back at 6 o'clock." },
+        { de: "Wann kommst du zurück?", en: "When are you coming back?" },
+        { de: "Er kommt morgen zurück.", en: "He comes back tomorrow." },
+        // abfahren (to depart)
+        { de: "Der Zug fährt um 9 Uhr ab.", en: "The train departs at 9 o'clock." },
+        { de: "Wann fährt der Bus ab?", en: "When does the bus depart?" },
+        // ankommen (to arrive)
+        { de: "Der Zug kommt um 10 Uhr an.", en: "The train arrives at 10 o'clock." },
+        { de: "Wann kommt das Flugzeug an?", en: "When does the plane arrive?" },
+        // fernsehen (to watch TV)
+        { de: "Ich sehe jeden Abend fern.", en: "I watch TV every evening." },
+        { de: "Siehst du gern fern?", en: "Do you like watching TV?" },
+        // aussehen (to look/appear)
+        { de: "Du siehst gut aus.", en: "You look good." },
+        { de: "Du siehst müde aus.", en: "You look tired." },
+        { de: "Wie sieht er aus?", en: "What does he look like?" },
+        // vorstellen (to introduce)
+        { de: "Ich stelle mich vor.", en: "I introduce myself." },
+        { de: "Darf ich mich vorstellen?", en: "May I introduce myself?" },
+        // vorbereiten (to prepare)
+        { de: "Ich bereite das Essen vor.", en: "I prepare the food." },
+        { de: "Sie bereitet sich auf die Prüfung vor.", en: "She prepares for the exam." },
+        // More separable verbs
+        { de: "Er macht das Licht an.", en: "He turns on the light." },
+        { de: "Sie macht das Licht aus.", en: "She turns off the light." },
+        { de: "Der Film hört um 22 Uhr auf.", en: "The movie ends at 10 PM." },
+        { de: "Ich rufe dich heute Abend an.", en: "I'll call you this evening." },
+        { de: "Er kommt um 18 Uhr zurück.", en: "He comes back at 6 PM." },
+        { de: "Sie zieht nächste Woche um.", en: "She is moving next week." },
+        { de: "Wir steigen hier aus.", en: "We get off here." },
+        { de: "Sie steigt in den Bus ein.", en: "She gets on the bus." },
+        { de: "Der Lehrer schreibt das Wort an.", en: "The teacher writes the word on the board." },
+        { de: "Ich lade das Dokument herunter.", en: "I download the document." },
+        { de: "Er gibt die Prüfung ab.", en: "He hands in the exam." },
+        { de: "Sie holt mich am Bahnhof ab.", en: "She picks me up at the station." },
+        { de: "Wann fängt der Unterricht an?", en: "When does the class start?" },
+        { de: "Ich mache morgen früh auf.", en: "I open early tomorrow." },
+        { de: "Die Kinder ziehen sich schnell an.", en: "The children get dressed quickly." },
+    ];
+
+    // ========== B1 SENTENCES (300+) ==========
+    const b1_relative_clauses = [
+        // der/die/das (nominative)
+        { de: "Der Mann, der dort steht, ist mein Vater.", en: "The man who is standing there is my father." },
+        { de: "Die Frau, die dort sitzt, ist meine Mutter.", en: "The woman who is sitting there is my mother." },
+        { de: "Das Kind, das dort spielt, ist mein Sohn.", en: "The child who is playing there is my son." },
+        { de: "Der Lehrer, der Deutsch unterrichtet, ist nett.", en: "The teacher who teaches German is nice." },
+        { de: "Die Ärztin, die mich behandelt, ist sehr gut.", en: "The doctor who treats me is very good." },
+        { de: "Das Buch, das auf dem Tisch liegt, gehört mir.", en: "The book that is on the table belongs to me." },
+        { de: "Der Hund, der bellt, gehört meinem Nachbarn.", en: "The dog that barks belongs to my neighbor." },
+        { de: "Die Katze, die schläft, ist sehr alt.", en: "The cat that is sleeping is very old." },
+        { de: "Der Film, der gestern lief, war interessant.", en: "The movie that was on yesterday was interesting." },
+        { de: "Die Stadt, die ich besucht habe, war schön.", en: "The city that I visited was beautiful." },
+        { de: "Das Restaurant, das neu ist, ist sehr gut.", en: "The restaurant that is new is very good." },
+        { de: "Der Mann, der mir geholfen hat, war freundlich.", en: "The man who helped me was friendly." },
+        { de: "Die Frau, die dort wohnt, ist Ärztin.", en: "The woman who lives there is a doctor." },
+        { de: "Das Auto, das dort parkt, gehört mir.", en: "The car that is parked there belongs to me." },
+        { de: "Der Student, der fleißig lernt, hat gute Noten.", en: "The student who studies hard has good grades." },
+        // den/die/das (accusative)
+        { de: "Der Mann, den ich gesehen habe, war alt.", en: "The man whom I saw was old." },
+        { de: "Die Frau, die ich getroffen habe, war nett.", en: "The woman whom I met was nice." },
+        { de: "Das Buch, das ich lese, ist spannend.", en: "The book that I am reading is exciting." },
+        { de: "Der Film, den ich gesehen habe, war gut.", en: "The movie that I watched was good." },
+        { de: "Die Pizza, die ich bestellt habe, war lecker.", en: "The pizza that I ordered was delicious." },
+        { de: "Das Geschenk, das ich bekommen habe, gefällt mir.", en: "I like the gift that I received." },
+        { de: "Den Kuchen, den sie gebacken hat, mag ich sehr.", en: "I really like the cake that she baked." },
+        { de: "Die E-Mail, die ich geschrieben habe, war wichtig.", en: "The email that I wrote was important." },
+        { de: "Das Lied, das er singt, kenne ich.", en: "I know the song that he is singing." },
+        // dem/der/dem (dative)
+        { de: "Der Mann, dem ich geholfen habe, war dankbar.", en: "The man whom I helped was grateful." },
+        { de: "Die Frau, der ich das Buch gegeben habe, ist meine Freundin.", en: "The woman to whom I gave the book is my friend." },
+        { de: "Das Kind, dem ich den Ball gegeben habe, ist glücklich.", en: "The child to whom I gave the ball is happy." },
+        { de: "Der Freund, mit dem ich gesprochen habe, kommt aus Berlin.", en: "The friend with whom I spoke comes from Berlin." },
+        { de: "Die Kollegin, mit der ich arbeite, ist sehr nett.", en: "The colleague with whom I work is very nice." },
+        { de: "Das Restaurant, in dem wir gegessen haben, war teuer.", en: "The restaurant in which we ate was expensive." },
+        { de: "Die Stadt, in der ich wohne, ist groß.", en: "The city in which I live is big." },
+        { de: "Das Haus, in dem er wohnt, ist alt.", en: "The house in which he lives is old." },
+        // more complex
+        { de: "Die Leute, die hier wohnen, sind freundlich.", en: "The people who live here are friendly." },
+        { de: "Alles, was er sagt, ist wahr.", en: "Everything that he says is true." },
+        { de: "Das ist etwas, was ich nicht verstehe.", en: "That is something that I don't understand." },
+        { de: "Das ist der beste Film, den ich je gesehen habe.", en: "That is the best movie I have ever seen." },
+        { de: "Das ist das schönste Buch, das ich je gelesen habe.", en: "That is the most beautiful book I have ever read." },
+        { de: "Der Freund, dessen Auto ich fahre, ist in Italien.", en: "The friend whose car I drive is in Italy." },
+        { de: "Die Frau, deren Kind krank ist, arbeitet zu Hause.", en: "The woman whose child is sick works at home." },
+        { de: "Das Buch, das du mir empfohlen hast, ist toll.", en: "The book that you recommended to me is great." },
+        { de: "Der Mann, der neben mir sitzt, ist mein Chef.", en: "The man who sits next to me is my boss." },
+        { de: "Die Stadt, in der ich aufgewachsen bin, ist klein.", en: "The city in which I grew up is small." },
+        { de: "Das Problem, das wir haben, ist kompliziert.", en: "The problem that we have is complicated." },
+        { de: "Der Computer, den ich gekauft habe, funktioniert gut.", en: "The computer that I bought works well." },
+        { de: "Die Frau, mit der er verheiratet ist, ist Ärztin.", en: "The woman to whom he is married is a doctor." },
+        { de: "Das Auto, das vor dem Haus steht, gehört meinem Vater.", en: "The car that is in front of the house belongs to my father." },
+        { de: "Der Lehrer, bei dem ich Deutsch lerne, ist sehr gut.", en: "The teacher with whom I learn German is very good." },
+        { de: "Das Café, in dem wir uns treffen, ist gemütlich.", en: "The café in which we meet is cozy." },
+        { de: "Die Musik, die er hört, gefällt mir nicht.", en: "I don't like the music that he listens to." },
+        { de: "Das Geschäft, in dem ich arbeite, schließt um 18 Uhr.", en: "The store in which I work closes at 6 PM." },
+        { de: "Der Arzt, zu dem ich gehe, ist sehr freundlich.", en: "The doctor whom I go to is very friendly." },
+        { de: "Das Mädchen, das dort singt, ist meine Tochter.", en: "The girl who is singing there is my daughter." },
+        { de: "Der Junge, dem ich geholfen habe, ist mein Nachbar.", en: "The boy whom I helped is my neighbor." },
+        { de: "Die Wohnung, die wir besichtigt haben, war teuer.", en: "The apartment that we visited was expensive." },
+        { de: "Das Essen, das meine Mutter kocht, ist köstlich.", en: "The food that my mother cooks is delicious." },
+        { de: "Der Film, über den alle sprechen, ist sehr gut.", en: "The movie that everyone talks about is very good." },
+        { de: "Die Prüfung, für die ich lerne, ist morgen.", en: "The exam that I am studying for is tomorrow." },
+        { de: "Das Land, aus dem er kommt, ist weit weg.", en: "The country that he comes from is far away." },
+        { de: "Die Sprache, die ich lerne, ist schwierig.", en: "The language that I am learning is difficult." },
+        { de: "Das Hotel, in dem wir übernachten, ist luxuriös.", en: "The hotel in which we stay is luxurious." },
+        { de: "Der Brief, den ich geschrieben habe, ist fertig.", en: "The letter that I wrote is finished." },
+        { de: "Die E-Mail, die ich bekommen habe, war wichtig.", en: "The email that I received was important." },
+        { de: "Das Lied, das sie singt, kenne ich gut.", en: "I know the song that she sings well." },
+        { de: "Der Kuchen, den sie gebacken hat, schmeckt lecker.", en: "The cake that she baked tastes delicious." },
+        { de: "Die Reise, von der er erzählt, war aufregend.", en: "The trip that he talks about was exciting." },
+        { de: "Das Thema, über das wir diskutieren, ist interessant.", en: "The topic that we discuss is interesting." },
+        { de: "Der Chef, für den ich arbeite, ist fair.", en: "The boss for whom I work is fair." },
+        { de: "Die Stadt, durch die wir fahren, ist historisch.", en: "The city through which we drive is historic." },
+        { de: "Das Gebäude, vor dem wir stehen, ist das Rathaus.", en: "The building in front of which we stand is the town hall." },
+        { de: "Der Park, in dem ich jogge, ist schön.", en: "The park in which I jog is beautiful." },
+        { de: "Das Projekt, an dem ich arbeite, ist fast fertig.", en: "The project on which I am working is almost finished." },
+    ];
+
+    const b1_konjunktiv2 = [
+        // würde + infinitive (would)
+        { de: "Ich würde gern nach Deutschland reisen.", en: "I would like to travel to Germany." },
+        { de: "Ich würde gern Deutsch lernen.", en: "I would like to learn German." },
+        { de: "Ich würde das gern machen.", en: "I would like to do that." },
+        { de: "Was würdest du machen?", en: "What would you do?" },
+        { de: "Würdest du mir helfen?", en: "Would you help me?" },
+        { de: "Würdest du das kaufen?", en: "Would you buy that?" },
+        { de: "Er würde gern kommen.", en: "He would like to come." },
+        { de: "Sie würde gern bleiben.", en: "She would like to stay." },
+        { de: "Wir würden gern mitmachen.", en: "We would like to participate." },
+        { de: "Das würde ich nicht machen.", en: "I wouldn't do that." },
+        { de: "Das würde nicht funktionieren.", en: "That wouldn't work." },
+        // wäre (would be)
+        { de: "Das wäre schön.", en: "That would be nice." },
+        { de: "Das wäre toll.", en: "That would be great." },
+        { de: "Das wäre möglich.", en: "That would be possible." },
+        { de: "Es wäre besser, wenn du kommst.", en: "It would be better if you come." },
+        { de: "Ich wäre glücklich.", en: "I would be happy." },
+        { de: "Ich wäre dankbar.", en: "I would be grateful." },
+        { de: "Wäre das in Ordnung?", en: "Would that be okay?" },
+        { de: "Wärst du so nett?", en: "Would you be so kind?" },
+        // hätte (would have)
+        { de: "Ich hätte gern einen Kaffee.", en: "I would like a coffee." },
+        { de: "Ich hätte gern die Rechnung.", en: "I would like the bill." },
+        { de: "Ich hätte mehr Zeit.", en: "I would have more time." },
+        { de: "Hätten Sie einen Moment Zeit?", en: "Would you have a moment?" },
+        { de: "Hätte ich das gewusst!", en: "If I had known that!" },
+        { de: "Das hätte ich nicht gedacht.", en: "I wouldn't have thought that." },
+        // könnte (could)
+        { de: "Könnten Sie mir helfen?", en: "Could you help me?" },
+        { de: "Könnten Sie das wiederholen?", en: "Could you repeat that?" },
+        { de: "Könnte ich bitte die Speisekarte haben?", en: "Could I please have the menu?" },
+        { de: "Könntest du das Fenster öffnen?", en: "Could you open the window?" },
+        { de: "Das könnte stimmen.", en: "That could be true." },
+        { de: "Das könnte ein Problem sein.", en: "That could be a problem." },
+        // wenn-Sätze (if-clauses)
+        { de: "Wenn ich Zeit hätte, würde ich kommen.", en: "If I had time, I would come." },
+        { de: "Wenn ich Geld hätte, würde ich ein Auto kaufen.", en: "If I had money, I would buy a car." },
+        { de: "Wenn ich reich wäre, würde ich reisen.", en: "If I were rich, I would travel." },
+        { de: "Wenn ich du wäre, würde ich das nicht machen.", en: "If I were you, I wouldn't do that." },
+        { de: "Wenn das Wetter schön wäre, würden wir spazieren gehen.", en: "If the weather were nice, we would go for a walk." },
+        { de: "Wenn ich mehr Zeit hätte, würde ich mehr lesen.", en: "If I had more time, I would read more." },
+        { de: "Wenn ich Deutsch könnte, würde ich in Berlin arbeiten.", en: "If I could speak German, I would work in Berlin." },
+        { de: "Wenn er hier wäre, wäre alles besser.", en: "If he were here, everything would be better." },
+        // polite requests
+        { de: "Würden Sie mir bitte helfen?", en: "Would you please help me?" },
+        { de: "Würden Sie mir bitte den Weg zeigen?", en: "Would you please show me the way?" },
+        { de: "Dürfte ich Sie etwas fragen?", en: "May I ask you something?" },
+        { de: "Wäre es möglich, früher zu kommen?", en: "Would it be possible to come earlier?" },
+        { de: "Wenn ich mehr Zeit hätte, würde ich mehr Sport machen.", en: "If I had more time, I would do more sports." },
+        { de: "Wenn das Wetter besser wäre, würden wir wandern.", en: "If the weather were better, we would go hiking." },
+        { de: "Ich wünschte, ich könnte fliegen.", en: "I wish I could fly." },
+        { de: "Er tat so, als ob er nichts wüsste.", en: "He acted as if he knew nothing." },
+        { de: "Sie sieht aus, als wäre sie müde.", en: "She looks as if she were tired." },
+        { de: "Es sieht so aus, als würde es regnen.", en: "It looks like it's going to rain." },
+        { de: "Wenn ich an deiner Stelle wäre, würde ich zustimmen.", en: "If I were in your place, I would agree." },
+        { de: "Ich wünschte, ich hätte mehr Geld.", en: "I wish I had more money." },
+        { de: "Wenn er hier wäre, würde er uns helfen.", en: "If he were here, he would help us." },
+        { de: "Es wäre schön, wenn du mitkommen könntest.", en: "It would be nice if you could come along." },
+        { de: "Ich würde gern mit dir sprechen.", en: "I would like to talk to you." },
+        { de: "Sie würde gern mehr reisen.", en: "She would like to travel more." },
+        { de: "Wir würden gern mehr Zeit zusammen verbringen.", en: "We would like to spend more time together." },
+        { de: "Hätte ich das nur gewusst!", en: "If only I had known that!" },
+        { de: "Wären wir nur früher gegangen!", en: "If only we had left earlier!" },
+        { de: "An deiner Stelle würde ich nicht warten.", en: "In your place, I would not wait." },
+        { de: "Das müsste reichen.", en: "That should be enough." },
+        { de: "Das dürfte stimmen.", en: "That is probably correct." },
+        { de: "Es könnte sein, dass er recht hat.", en: "It could be that he is right." },
+        { de: "Ich sollte mehr lernen.", en: "I should study more." },
+        { de: "Du solltest früher aufstehen.", en: "You should get up earlier." },
+        { de: "Wir sollten uns beeilen.", en: "We should hurry." },
+        { de: "Das würde mich sehr freuen.", en: "That would make me very happy." },
+        { de: "Es wäre nett, wenn du helfen könntest.", en: "It would be nice if you could help." },
+        { de: "Wenn ich könnte, würde ich dir alles geben.", en: "If I could, I would give you everything." },
+        { de: "Ich täte das nie.", en: "I would never do that." },
+        { de: "Wie wäre es mit einem Kaffee?", en: "How about a coffee?" },
+        { de: "Was würdest du an meiner Stelle tun?", en: "What would you do in my place?" },
+        { de: "Ich hätte gern die Speisekarte.", en: "I would like the menu, please." },
+        { de: "Würden Sie mir bitte den Weg zeigen?", en: "Would you please show me the way?" },
+        { de: "Könnten Sie mir bitte helfen?", en: "Could you please help me?" },
+    ];
+
+    const b1_passive_voice = [
+        // Präsens Passiv (wird + Partizip II)
+        { de: "Das Buch wird gelesen.", en: "The book is being read." },
+        { de: "Das Essen wird gekocht.", en: "The food is being cooked." },
+        { de: "Die E-Mail wird geschrieben.", en: "The email is being written." },
+        { de: "Die Tür wird geöffnet.", en: "The door is being opened." },
+        { de: "Das Fenster wird geschlossen.", en: "The window is being closed." },
+        { de: "Das Auto wird repariert.", en: "The car is being repaired." },
+        { de: "Das Haus wird gebaut.", en: "The house is being built." },
+        { de: "Der Brief wird geschickt.", en: "The letter is being sent." },
+        { de: "Die Rechnung wird bezahlt.", en: "The bill is being paid." },
+        { de: "Das Zimmer wird geputzt.", en: "The room is being cleaned." },
+        { de: "Deutsch wird hier gesprochen.", en: "German is spoken here." },
+        { de: "Pizza wird hier verkauft.", en: "Pizza is sold here." },
+        { de: "Die Arbeit wird heute erledigt.", en: "The work is being done today." },
+        { de: "Das Problem wird untersucht.", en: "The problem is being investigated." },
+        { de: "Der Patient wird behandelt.", en: "The patient is being treated." },
+        // Präteritum Passiv (wurde + Partizip II)
+        { de: "Das Buch wurde gelesen.", en: "The book was read." },
+        { de: "Das Essen wurde gekocht.", en: "The food was cooked." },
+        { de: "Die E-Mail wurde geschrieben.", en: "The email was written." },
+        { de: "Die Tür wurde geöffnet.", en: "The door was opened." },
+        { de: "Das Fenster wurde geschlossen.", en: "The window was closed." },
+        { de: "Das Auto wurde repariert.", en: "The car was repaired." },
+        { de: "Das Haus wurde 1990 gebaut.", en: "The house was built in 1990." },
+        { de: "Der Brief wurde gestern geschickt.", en: "The letter was sent yesterday." },
+        { de: "Die Rechnung wurde bezahlt.", en: "The bill was paid." },
+        { de: "Das Zimmer wurde geputzt.", en: "The room was cleaned." },
+        { de: "Das Bild wurde von Picasso gemalt.", en: "The painting was painted by Picasso." },
+        { de: "Amerika wurde von Kolumbus entdeckt.", en: "America was discovered by Columbus." },
+        { de: "Der Kuchen wurde von meiner Mutter gebacken.", en: "The cake was baked by my mother." },
+        { de: "Das Lied wurde von vielen gehört.", en: "The song was heard by many." },
+        // Perfekt Passiv (ist + Partizip II + worden)
+        { de: "Das Auto ist repariert worden.", en: "The car has been repaired." },
+        { de: "Das Haus ist verkauft worden.", en: "The house has been sold." },
+        { de: "Die Aufgabe ist erledigt worden.", en: "The task has been completed." },
+        { de: "Der Brief ist geschickt worden.", en: "The letter has been sent." },
+        { de: "Das Problem ist gelöst worden.", en: "The problem has been solved." },
+        // Modal + Passiv
+        { de: "Das muss gemacht werden.", en: "That must be done." },
+        { de: "Das kann nicht geändert werden.", en: "That cannot be changed." },
+        { de: "Das sollte sofort erledigt werden.", en: "That should be done immediately." },
+        { de: "Das Fenster kann geöffnet werden.", en: "The window can be opened." },
+        { de: "Die Rechnung muss bezahlt werden.", en: "The bill must be paid." },
+        { de: "Die E-Mails werden jeden Tag gelesen.", en: "The emails are read every day." },
+        { de: "Das Büro wird jeden Abend geputzt.", en: "The office is cleaned every evening." },
+        { de: "Die Pakete werden morgen geliefert.", en: "The packages will be delivered tomorrow." },
+        { de: "Der Patient wird gut behandelt.", en: "The patient is being treated well." },
+        { de: "Die Musik wird laut gespielt.", en: "The music is played loudly." },
+        { de: "Der Vertrag wird unterschrieben.", en: "The contract is being signed." },
+        { de: "Das Geld wird gespart.", en: "The money is being saved." },
+        { de: "Die Kinder werden gut erzogen.", en: "The children are being raised well." },
+        { de: "Das Projekt wurde erfolgreich abgeschlossen.", en: "The project was completed successfully." },
+        { de: "Der Termin wurde verschoben.", en: "The appointment was postponed." },
+        { de: "Die Nachricht wurde gesendet.", en: "The message was sent." },
+        { de: "Die Aufgabe wurde erledigt.", en: "The task was completed." },
+        { de: "Das Fenster wurde von ihr geöffnet.", en: "The window was opened by her." },
+        { de: "Der Text wurde von mir geschrieben.", en: "The text was written by me." },
+        { de: "Das Problem wurde von uns gelöst.", en: "The problem was solved by us." },
+        { de: "Der Film wurde in Deutschland gedreht.", en: "The movie was filmed in Germany." },
+        { de: "Das Lied wurde von vielen gehört.", en: "The song was heard by many." },
+        { de: "Die Arbeit ist erledigt worden.", en: "The work has been done." },
+        { de: "Das Dokument ist gedruckt worden.", en: "The document has been printed." },
+        { de: "Die Frage ist beantwortet worden.", en: "The question has been answered." },
+        { de: "Das Formular muss ausgefüllt werden.", en: "The form must be filled out." },
+        { de: "Die Tür soll geschlossen werden.", en: "The door should be closed." },
+        { de: "Das Essen kann bestellt werden.", en: "The food can be ordered." },
+        { de: "Die Prüfung muss bestanden werden.", en: "The exam must be passed." },
+        { de: "Das Auto wird gewaschen.", en: "The car is being washed." },
+        { de: "Die Stadt wird renoviert.", en: "The city is being renovated." },
+        { de: "Der Raum wurde dekoriert.", en: "The room was decorated." },
+        { de: "Das Bild wurde gemalt.", en: "The painting was painted." },
+        { de: "Die Regeln werden befolgt.", en: "The rules are being followed." },
+        { de: "Der Text wird übersetzt.", en: "The text is being translated." },
+        { de: "Das Gesetz wurde geändert.", en: "The law was changed." },
+        { de: "Die Straße wird gebaut.", en: "The road is being built." },
+        { de: "Das Spiel wird übertragen.", en: "The game is being broadcast." },
+        { de: "Die Tickets sind ausverkauft worden.", en: "The tickets have been sold out." },
+        { de: "Das Meeting wurde abgesagt.", en: "The meeting was cancelled." },
+    ];
+
+    const b1_wenn_als = [
+        // wenn (when/if - repeated or future)
+        { de: "Wenn es regnet, bleibe ich zu Hause.", en: "When it rains, I stay at home." },
+        { de: "Wenn ich Zeit habe, lese ich ein Buch.", en: "When I have time, I read a book." },
+        { de: "Wenn du kommst, rufe mich an.", en: "When you come, call me." },
+        { de: "Wenn das Wetter schön ist, gehen wir spazieren.", en: "When the weather is nice, we go for a walk." },
+        { de: "Wenn ich müde bin, trinke ich Kaffee.", en: "When I am tired, I drink coffee." },
+        { de: "Wenn ich nach Hause komme, esse ich.", en: "When I come home, I eat." },
+        { de: "Wenn er anruft, sage ich dir Bescheid.", en: "When he calls, I will let you know." },
+        { de: "Wenn sie Geburtstag hat, kaufen wir ein Geschenk.", en: "When it's her birthday, we buy a gift." },
+        { de: "Wenn wir Urlaub haben, fahren wir ans Meer.", en: "When we have vacation, we go to the sea." },
+        { de: "Immer wenn ich sie sehe, lächelt sie.", en: "Whenever I see her, she smiles." },
+        { de: "Jedes Mal wenn er kommt, bringt er Blumen mit.", en: "Every time he comes, he brings flowers." },
+        { de: "Wenn du willst, können wir ins Kino gehen.", en: "If you want, we can go to the cinema." },
+        { de: "Wenn du Zeit hast, komm vorbei.", en: "If you have time, come over." },
+        { de: "Wenn das stimmt, haben wir ein Problem.", en: "If that is true, we have a problem." },
+        { de: "Wenn du möchtest, helfe ich dir.", en: "If you want, I'll help you." },
+        { de: "Wenn wir uns beeilen, schaffen wir es.", en: "If we hurry, we'll make it." },
+        { de: "Wenn ich das gewusst hätte, wäre ich gekommen.", en: "If I had known that, I would have come." },
+        // als (when - single event in past)
+        { de: "Als ich jung war, wohnte ich in Berlin.", en: "When I was young, I lived in Berlin." },
+        { de: "Als ich ein Kind war, spielte ich viel draußen.", en: "When I was a child, I played outside a lot." },
+        { de: "Als er ankam, war es schon dunkel.", en: "When he arrived, it was already dark." },
+        { de: "Als wir uns trafen, regnete es.", en: "When we met, it was raining." },
+        { de: "Als sie die Nachricht hörte, freute sie sich.", en: "When she heard the news, she was happy." },
+        { de: "Als ich zur Schule ging, hatte ich viele Freunde.", en: "When I went to school, I had many friends." },
+        { de: "Als der Film anfing, war das Kino voll.", en: "When the movie started, the cinema was full." },
+        { de: "Als ich aufwachte, schien die Sonne.", en: "When I woke up, the sun was shining." },
+        { de: "Als ich in Deutschland war, habe ich viel gelernt.", en: "When I was in Germany, I learned a lot." },
+        { de: "Als er das erste Mal kam, war er nervös.", en: "When he came for the first time, he was nervous." },
+        { de: "Als ich sie zum ersten Mal sah, war ich verliebt.", en: "When I first saw her, I was in love." },
+        { de: "Als ich ins Büro kam, war niemand da.", en: "When I came to the office, nobody was there." },
+        { de: "Als das Telefon klingelte, schlief ich.", en: "When the phone rang, I was sleeping." },
+        { de: "Als ich die Prüfung bestand, war ich sehr glücklich.", en: "When I passed the exam, I was very happy." },
+        { de: "Als er das hörte, wurde er wütend.", en: "When he heard that, he got angry." },
+        { de: "Als ich ihn sah, erkannte ich ihn sofort.", en: "When I saw him, I recognized him immediately." },
+        { de: "Als wir dort ankamen, war es schon zu spät.", en: "When we arrived there, it was already too late." },
+        { de: "Als das Konzert endete, applaudierten alle.", en: "When the concert ended, everyone applauded." },
+        { de: "Wenn ich frei habe, schlafe ich lange.", en: "When I have a day off, I sleep in." },
+        { de: "Wenn sie mich fragt, sage ich ja.", en: "When she asks me, I say yes." },
+        { de: "Wenn der Wecker klingelt, stehe ich auf.", en: "When the alarm rings, I get up." },
+        { de: "Wenn ich Kopfschmerzen habe, nehme ich eine Tablette.", en: "When I have a headache, I take a pill." },
+        { de: "Wenn das Telefon klingelt, antworte ich.", en: "When the phone rings, I answer." },
+        { de: "Wenn ich Geburtstag habe, feiere ich mit Freunden.", en: "When it's my birthday, I celebrate with friends." },
+        { de: "Wenn die Sonne scheint, gehen wir an den See.", en: "When the sun shines, we go to the lake." },
+        { de: "Als ich klein war, hatte ich einen Hund.", en: "When I was little, I had a dog." },
+        { de: "Als er 18 wurde, machte er den Führerschein.", en: "When he turned 18, he got his driver's license." },
+        { de: "Als sie nach Berlin zog, war sie 25.", en: "When she moved to Berlin, she was 25." },
+        { de: "Als wir uns kennenlernten, war ich Student.", en: "When we met, I was a student." },
+        { de: "Als ich die E-Mail las, war ich überrascht.", en: "When I read the email, I was surprised." },
+        { de: "Als der Winter kam, wurde es kalt.", en: "When winter came, it got cold." },
+        { de: "Als ich ankam, warteten alle auf mich.", en: "When I arrived, everyone was waiting for me." },
+        { de: "Als er ging, sagte er nichts.", en: "When he left, he said nothing." },
+        { de: "Als ich aufwachte, war es schon Mittag.", en: "When I woke up, it was already noon." },
+        { de: "Als wir in Italien waren, haben wir Pizza gegessen.", en: "When we were in Italy, we ate pizza." },
+        { de: "Als ich Student war, hatte ich wenig Geld.", en: "When I was a student, I had little money." },
+        { de: "Als sie die Prüfung bestand, war sie glücklich.", en: "When she passed the exam, she was happy." },
+        { de: "Wenn es schneit, bleiben wir zu Hause.", en: "When it snows, we stay at home." },
+        { de: "Wenn ich müde werde, trinke ich Kaffee.", en: "When I get tired, I drink coffee." },
+        { de: "Wenn du ankommst, ruf mich an.", en: "When you arrive, call me." },
+        { de: "Als ich ihn fragte, antwortete er nicht.", en: "When I asked him, he didn't answer." },
+        { de: "Als die Nachricht kam, war ich beim Essen.", en: "When the news came, I was eating." },
+        { de: "Wenn ich krank bin, gehe ich zum Arzt.", en: "When I am sick, I go to the doctor." },
+        { de: "Wenn wir uns sehen, reden wir immer lange.", en: "When we see each other, we always talk for a long time." },
+        { de: "Als sie hereinkam, wurde es still.", en: "When she came in, it became quiet." },
+        { de: "Als das Spiel endete, jubelten die Fans.", en: "When the game ended, the fans cheered." },
+        { de: "Wenn ich nervös bin, beiße ich auf meine Nägel.", en: "When I am nervous, I bite my nails." },
+        { de: "Wenn du fertig bist, können wir gehen.", en: "When you are ready, we can go." },
+    ];
+
+    // ========== B2 SENTENCES (300+) ==========
+    const b2_advanced_connectors = [
+        // obwohl (although) - verb at end
+        { de: "Obwohl es regnet, gehe ich spazieren.", en: "Although it is raining, I go for a walk." },
+        { de: "Obwohl er müde ist, arbeitet er weiter.", en: "Although he is tired, he keeps working." },
+        { de: "Obwohl sie krank ist, geht sie zur Arbeit.", en: "Although she is sick, she goes to work." },
+        { de: "Obwohl das Essen teuer ist, bestellen wir es.", en: "Although the food is expensive, we order it." },
+        { de: "Obwohl ich keine Zeit habe, helfe ich dir.", en: "Although I have no time, I help you." },
+        { de: "Obwohl es spät ist, lernen wir weiter.", en: "Although it is late, we keep studying." },
+        { de: "Obwohl der Film lang ist, ist er spannend.", en: "Although the movie is long, it is exciting." },
+        { de: "Obwohl wir wenig Geld haben, reisen wir gern.", en: "Although we have little money, we like to travel." },
+        { de: "Obwohl das Wetter schlecht ist, spielen die Kinder draußen.", en: "Although the weather is bad, the children play outside." },
+        { de: "Obwohl ich Deutsch lerne, ist es schwer.", en: "Although I am learning German, it is hard." },
+        { de: "Obwohl er nicht viel verdient, ist er zufrieden.", en: "Although he doesn't earn much, he is satisfied." },
+        { de: "Obwohl sie erst 20 ist, hat sie viel Erfahrung.", en: "Although she is only 20, she has a lot of experience." },
+        // trotzdem (nevertheless) - verb in 2nd position
+        { de: "Es regnet. Trotzdem gehe ich spazieren.", en: "It is raining. Nevertheless, I go for a walk." },
+        { de: "Er ist müde. Trotzdem arbeitet er weiter.", en: "He is tired. Nevertheless, he keeps working." },
+        { de: "Sie hat wenig Zeit. Trotzdem hilft sie mir.", en: "She has little time. Nevertheless, she helps me." },
+        { de: "Das Buch ist lang. Trotzdem lese ich es.", en: "The book is long. Nevertheless, I read it." },
+        { de: "Der Test ist schwer. Trotzdem versuche ich es.", en: "The test is hard. Nevertheless, I try." },
+        { de: "Wir sind spät dran. Trotzdem schaffen wir es.", en: "We are running late. Nevertheless, we make it." },
+        { de: "Ich bin krank. Trotzdem gehe ich zur Arbeit.", en: "I am sick. Nevertheless, I go to work." },
+        { de: "Es ist kalt. Trotzdem schwimmen wir.", en: "It is cold. Nevertheless, we swim." },
+        { de: "Er hat keine Lust. Trotzdem macht er es.", en: "He doesn't feel like it. Nevertheless, he does it." },
+        { de: "Sie ist müde. Trotzdem geht sie aus.", en: "She is tired. Nevertheless, she goes out." },
+        // deshalb/deswegen (therefore)
+        { de: "Ich bin müde. Deshalb gehe ich früh ins Bett.", en: "I am tired. Therefore, I go to bed early." },
+        { de: "Es regnet. Deshalb bleibe ich zu Hause.", en: "It is raining. Therefore, I stay at home." },
+        { de: "Er ist krank. Deshalb geht er zum Arzt.", en: "He is sick. Therefore, he goes to the doctor." },
+        { de: "Sie hat Hunger. Deshalb isst sie etwas.", en: "She is hungry. Therefore, she eats something." },
+        { de: "Wir haben keine Zeit. Deshalb nehmen wir ein Taxi.", en: "We have no time. Therefore, we take a taxi." },
+        { de: "Das Wetter ist schön. Deshalb gehen wir spazieren.", en: "The weather is nice. Therefore, we go for a walk." },
+        { de: "Ich habe Kopfschmerzen. Deshalb nehme ich eine Tablette.", en: "I have a headache. Therefore, I take a pill." },
+        // falls (in case/if)
+        { de: "Falls es regnet, nehme ich einen Regenschirm mit.", en: "In case it rains, I'll take an umbrella." },
+        { de: "Falls du Zeit hast, ruf mich an.", en: "If you have time, call me." },
+        { de: "Falls er kommt, sage ich ihm Bescheid.", en: "If he comes, I'll let him know." },
+        { de: "Falls du Hilfe brauchst, frag mich.", en: "If you need help, ask me." },
+        { de: "Falls es Probleme gibt, melde dich bei mir.", en: "If there are problems, contact me." },
+        // bevor (before) - verb at end
+        { de: "Ich frühstücke, bevor ich zur Arbeit gehe.", en: "I have breakfast before I go to work." },
+        { de: "Wasch dir die Hände, bevor du isst.", en: "Wash your hands before you eat." },
+        { de: "Bevor ich schlafen gehe, lese ich ein Buch.", en: "Before I go to sleep, I read a book." },
+        { de: "Er überprüft alles, bevor er eine Entscheidung trifft.", en: "He checks everything before he makes a decision." },
+        // nachdem (after) - verb at end
+        { de: "Nachdem ich gegessen habe, gehe ich spazieren.", en: "After I have eaten, I go for a walk." },
+        { de: "Nachdem sie angekommen war, rief sie mich an.", en: "After she had arrived, she called me." },
+        { de: "Nachdem wir das besprochen haben, treffen wir eine Entscheidung.", en: "After we have discussed it, we will make a decision." },
+        { de: "Ich fühle mich besser, nachdem ich Sport gemacht habe.", en: "I feel better after I have done sports." },
+        // während (while)
+        { de: "Während ich koche, hört er Musik.", en: "While I cook, he listens to music." },
+        { de: "Während er arbeitet, passt sie auf die Kinder auf.", en: "While he works, she watches the children." },
+        { de: "Während ich schlafe, liest sie.", en: "While I sleep, she reads." },
+        { de: "Während des Unterrichts darf man nicht telefonieren.", en: "During class, you are not allowed to use the phone." },
+        // je...desto (the...the)
+        { de: "Je mehr ich lerne, desto besser werde ich.", en: "The more I learn, the better I get." },
+        { de: "Je früher du kommst, desto besser.", en: "The earlier you come, the better." },
+        { de: "Je älter man wird, desto weiser wird man.", en: "The older you get, the wiser you become." },
+        { de: "Je mehr du übst, desto schneller lernst du.", en: "The more you practice, the faster you learn." },
+        // indem (by + verb-ing)
+        { de: "Man lernt, indem man viel liest.", en: "You learn by reading a lot." },
+        { de: "Man bleibt gesund, indem man Sport treibt.", en: "You stay healthy by doing sports." },
+        { de: "Man spart Geld, indem man weniger kauft.", en: "You save money by buying less." },
+        { de: "Man verbessert sich, indem man jeden Tag übt.", en: "You improve by practicing every day." },
+        { de: "Er hilft, indem er zuhört.", en: "He helps by listening." },
+        { de: "Sie lernt Deutsch, indem sie Filme schaut.", en: "She learns German by watching movies." },
+        { de: "Wir schützen die Umwelt, indem wir recyceln.", en: "We protect the environment by recycling." },
+        { de: "Obwohl ich früh aufgestanden bin, bin ich spät.", en: "Although I got up early, I am late." },
+        { de: "Obwohl er viel verdient, ist er nicht glücklich.", en: "Although he earns a lot, he is not happy." },
+        { de: "Trotzdem entspannt er sich nicht.", en: "Nevertheless, he does not relax." },
+        { de: "Ich bin krank. Trotzdem arbeite ich.", en: "I am sick. Nevertheless, I work." },
+        { de: "Deshalb habe ich abgesagt.", en: "Therefore, I cancelled." },
+        { de: "Deswegen bin ich hier.", en: "That's why I am here." },
+        { de: "Falls du früher fertig bist, ruf mich an.", en: "If you finish earlier, call me." },
+        { de: "Falls etwas passiert, benachrichtige mich.", en: "If something happens, notify me." },
+        { de: "Bevor du gehst, vergiss nicht die Schlüssel.", en: "Before you go, don't forget the keys." },
+        { de: "Bevor er antwortet, denkt er immer nach.", en: "Before he answers, he always thinks." },
+        { de: "Nachdem ich aufgewacht bin, dusche ich.", en: "After I wake up, I shower." },
+        { de: "Nachdem er gegangen war, wurde es still.", en: "After he had left, it became quiet." },
+        { de: "Während sie kocht, hört sie Musik.", en: "While she cooks, she listens to music." },
+        { de: "Während wir warteten, lasen wir die Zeitung.", en: "While we waited, we read the newspaper." },
+        { de: "Je schneller du läufst, desto müder wirst du.", en: "The faster you run, the more tired you get." },
+        { de: "Je länger man wartet, desto schwieriger wird es.", en: "The longer you wait, the harder it gets." },
+        { de: "Sowohl er als auch sie sprechen Deutsch.", en: "Both he and she speak German." },
+        { de: "Weder er noch sie kommen heute.", en: "Neither he nor she is coming today." },
+        { de: "Entweder wir gehen jetzt oder wir bleiben.", en: "Either we go now or we stay." },
+        { de: "Nicht nur das Essen, sondern auch der Service war gut.", en: "Not only the food, but also the service was good." },
+        { de: "Einerseits ist es gut, andererseits schwierig.", en: "On the one hand it is good, on the other hand difficult." },
+        { de: "Anstatt zu arbeiten, schaut er fern.", en: "Instead of working, he watches TV." },
+        { de: "Ohne zu frühstücken, ging sie zur Arbeit.", en: "Without having breakfast, she went to work." },
+        { de: "Um gut Deutsch zu sprechen, muss man üben.", en: "In order to speak good German, one must practice." },
+        { de: "Obwohl sie müde war, machte sie weiter.", en: "Although she was tired, she continued." },
+        { de: "Obwohl das Buch lang ist, lese ich es gern.", en: "Although the book is long, I enjoy reading it." },
+        { de: "Seitdem er hier arbeitet, ist er glücklich.", en: "Since he has been working here, he is happy." },
+        { de: "Sobald ich fertig bin, sage ich dir Bescheid.", en: "As soon as I am done, I will let you know." },
+        { de: "Solange du fleißig bist, wirst du Erfolg haben.", en: "As long as you are hardworking, you will succeed." },
+    ];
+
+    const b2_double_infinitive = [
+        // Perfekt with modal verbs (haben + ... + infinitive + modal infinitive)
+        { de: "Ich habe arbeiten müssen.", en: "I had to work." },
+        { de: "Ich habe das machen müssen.", en: "I had to do that." },
+        { de: "Ich habe früh aufstehen müssen.", en: "I had to get up early." },
+        { de: "Ich habe nicht kommen können.", en: "I couldn't come." },
+        { de: "Ich habe nicht schlafen können.", en: "I couldn't sleep." },
+        { de: "Ich habe ihn nicht sehen können.", en: "I couldn't see him." },
+        { de: "Ich habe das nicht verstehen können.", en: "I couldn't understand that." },
+        { de: "Ich habe gehen wollen.", en: "I wanted to go." },
+        { de: "Ich habe bleiben wollen.", en: "I wanted to stay." },
+        { de: "Ich habe nicht warten wollen.", en: "I didn't want to wait." },
+        { de: "Er hat lange warten müssen.", en: "He had to wait for a long time." },
+        { de: "Er hat viel arbeiten müssen.", en: "He had to work a lot." },
+        { de: "Er hat nicht mitkommen können.", en: "He couldn't come along." },
+        { de: "Er hat nicht fahren dürfen.", en: "He wasn't allowed to drive." },
+        { de: "Sie hat früh gehen müssen.", en: "She had to leave early." },
+        { de: "Sie hat nicht kommen können.", en: "She couldn't come." },
+        { de: "Sie hat helfen wollen.", en: "She wanted to help." },
+        { de: "Wir haben ins Kino gehen wollen.", en: "We wanted to go to the cinema." },
+        { de: "Wir haben das machen müssen.", en: "We had to do that." },
+        { de: "Wir haben nicht bleiben können.", en: "We couldn't stay." },
+        { de: "Ich habe ihm helfen wollen.", en: "I wanted to help him." },
+        { de: "Sie hat das Buch lesen wollen.", en: "She wanted to read the book." },
+        { de: "Er hat nicht mit uns kommen dürfen.", en: "He wasn't allowed to come with us." },
+        { de: "Wir haben gestern nicht arbeiten müssen.", en: "We didn't have to work yesterday." },
+        { de: "Ich habe nicht länger bleiben können.", en: "I couldn't stay any longer." },
+        { de: "Hast du das machen müssen?", en: "Did you have to do that?" },
+        { de: "Hat er nicht kommen können?", en: "Couldn't he come?" },
+        { de: "Habt ihr das sehen können?", en: "Were you able to see that?" },
+        // lassen
+        { de: "Ich habe mir die Haare schneiden lassen.", en: "I had my hair cut." },
+        { de: "Ich habe das Auto reparieren lassen.", en: "I had the car repaired." },
+        { de: "Ich habe mir ein Kleid machen lassen.", en: "I had a dress made for me." },
+        { de: "Er hat sich ein Haus bauen lassen.", en: "He had a house built for himself." },
+        { de: "Sie hat das Dokument übersetzen lassen.", en: "She had the document translated." },
+        // sehen, hören
+        { de: "Ich habe ihn kommen sehen.", en: "I saw him coming." },
+        { de: "Ich habe sie singen hören.", en: "I heard her singing." },
+        { de: "Ich habe die Kinder spielen sehen.", en: "I saw the children playing." },
+        { de: "Er hat sie weinen hören.", en: "He heard her crying." },
+        { de: "Ich habe das Auto waschen lassen.", en: "I had the car washed." },
+        { de: "Sie hat sich die Nägel machen lassen.", en: "She had her nails done." },
+        { de: "Wir haben das Essen liefern lassen.", en: "We had the food delivered." },
+        { de: "Er hat den Text korrigieren lassen.", en: "He had the text corrected." },
+        { de: "Ich habe die Wäsche abholen lassen.", en: "I had the laundry picked up." },
+        { de: "Haben Sie schon bestellen können?", en: "Were you able to order already?" },
+        { de: "Ich habe leider nicht kommen dürfen.", en: "Unfortunately, I wasn't allowed to come." },
+        { de: "Er hat den Brief schreiben müssen.", en: "He had to write the letter." },
+        { de: "Sie hat früher gehen dürfen.", en: "She was allowed to leave earlier." },
+        { de: "Wir haben alles vorbereiten müssen.", en: "We had to prepare everything." },
+        { de: "Er hat sie anrufen wollen.", en: "He wanted to call her." },
+        { de: "Sie hat mit ihm sprechen wollen.", en: "She wanted to talk to him." },
+        { de: "Ich habe dich besuchen wollen.", en: "I wanted to visit you." },
+        { de: "Wir haben euch einladen wollen.", en: "We wanted to invite you." },
+        { de: "Ich habe ihn weggehen sehen.", en: "I saw him leave." },
+        { de: "Sie hat die Kinder lachen hören.", en: "She heard the children laughing." },
+        { de: "Er hat den Hund bellen hören.", en: "He heard the dog barking." },
+        { de: "Wir haben sie tanzen sehen.", en: "We saw her dancing." },
+        { de: "Ich habe ihn schlafen lassen.", en: "I let him sleep." },
+        { de: "Sie hat mich warten lassen.", en: "She made me wait." },
+        { de: "Er hat uns draussen warten lassen.", en: "He made us wait outside." },
+        { de: "Du hättest früher kommen sollen.", en: "You should have come earlier." },
+        { de: "Ich hätte mehr lernen sollen.", en: "I should have studied more." },
+        { de: "Er hätte das nicht sagen dürfen.", en: "He shouldn't have said that." },
+        { de: "Wir hätten früher anfangen sollen.", en: "We should have started earlier." },
+        { de: "Sie hätte das wissen müssen.", en: "She should have known that." },
+        { de: "Ich hätte nicht gehen dürfen.", en: "I shouldn't have been allowed to go." },
+        { de: "Du hättest mich fragen können.", en: "You could have asked me." },
+        { de: "Er hätte schneller laufen können.", en: "He could have run faster." },
+        { de: "Sie hätte länger bleiben können.", en: "She could have stayed longer." },
+    ];
+
+    const b2_nominalization = [
+        // Verb → das + capitalized infinitive
+        { de: "Das Lesen ist mein Hobby.", en: "Reading is my hobby." },
+        { de: "Das Schreiben fällt mir leicht.", en: "Writing is easy for me." },
+        { de: "Das Kochen macht Spaß.", en: "Cooking is fun." },
+        { de: "Das Reisen erweitert den Horizont.", en: "Travelling broadens the mind." },
+        { de: "Das Lernen erfordert Geduld.", en: "Learning requires patience." },
+        { de: "Das Schwimmen ist gesund.", en: "Swimming is healthy." },
+        { de: "Das Tanzen macht mich glücklich.", en: "Dancing makes me happy." },
+        { de: "Das Singen entspannt mich.", en: "Singing relaxes me." },
+        { de: "Das Wandern ist beliebt in Deutschland.", en: "Hiking is popular in Germany." },
+        { de: "Das Rauchen ist ungesund.", en: "Smoking is unhealthy." },
+        { de: "Das Trinken von Wasser ist wichtig.", en: "Drinking water is important." },
+        { de: "Das Autofahren macht mir Spaß.", en: "Driving makes me happy." },
+        { de: "Das Einkaufen am Samstag ist stressig.", en: "Shopping on Saturday is stressful." },
+        { de: "Das Warten nervt mich.", en: "Waiting annoys me." },
+        { de: "Das Arbeiten von zu Hause ist bequem.", en: "Working from home is comfortable." },
+        { de: "Das Schlafen ist wichtig für die Gesundheit.", en: "Sleeping is important for health." },
+        // Adjective → das + capitalized adjective
+        { de: "Das Wichtigste ist die Gesundheit.", en: "The most important thing is health." },
+        { de: "Das Schöne daran ist die Natur.", en: "The beautiful thing about it is the nature." },
+        { de: "Das Beste kommt zum Schluss.", en: "The best comes at the end." },
+        { de: "Das Gute an ihm ist seine Ehrlichkeit.", en: "The good thing about him is his honesty." },
+        { de: "Das Interessante an dem Buch ist die Geschichte.", en: "The interesting thing about the book is the story." },
+        { de: "Das Schwierige ist der Anfang.", en: "The difficult thing is the beginning." },
+        { de: "Das Einzige, was zählt, ist Liebe.", en: "The only thing that matters is love." },
+        { de: "Das Neue an diesem Modell ist der Motor.", en: "The new thing about this model is the engine." },
+        { de: "Das Tolle an der Stadt ist die Architektur.", en: "The great thing about the city is the architecture." },
+        // other nominalizations
+        { de: "Sein Verhalten ist inakzeptabel.", en: "His behavior is unacceptable." },
+        { de: "Mein Wissen reicht nicht aus.", en: "My knowledge is not sufficient." },
+        { de: "Das Ergebnis ist überraschend.", en: "The result is surprising." },
+        { de: "Das Essen war köstlich.", en: "The food was delicious." },
+        { de: "Das Leben ist schön.", en: "Life is beautiful." },
+        { de: "Das Denken formt die Realität.", en: "Thinking shapes reality." },
+        { de: "Das Reden hilft manchmal.", en: "Talking helps sometimes." },
+        { de: "Das Frühstücken ist wichtig.", en: "Having breakfast is important." },
+        { de: "Das Warten macht mich nervös.", en: "Waiting makes me nervous." },
+        { de: "Das Lachen ist gesund.", en: "Laughing is healthy." },
+        { de: "Das Schlafen ist entspannend.", en: "Sleeping is relaxing." },
+        { de: "Das Spazierengehen tut gut.", en: "Walking is good for you." },
+        { de: "Das Joggen hält fit.", en: "Jogging keeps you fit." },
+        { de: "Das Meditieren beruhigt.", en: "Meditating calms down." },
+        { de: "Das Frühe ist manchmal schwer.", en: "The early part is sometimes hard." },
+        { de: "Das Negative sollte man vermeiden.", en: "One should avoid the negative." },
+        { de: "Das Positive sehen.", en: "See the positive." },
+        { de: "Das Mögliche versuchen.", en: "Try the possible." },
+        { de: "Das Wesentliche verstehen.", en: "Understand the essential." },
+        { de: "Das Richtige tun.", en: "Do the right thing." },
+        { de: "Sein Verständnis war hilfreich.", en: "His understanding was helpful." },
+        { de: "Ihr Können ist beeindruckend.", en: "Her ability is impressive." },
+        { de: "Das Sprechen vor Publikum ist schwer.", en: "Speaking in front of an audience is hard." },
+        { de: "Das Lernen macht Spaß.", en: "Learning is fun." },
+        { de: "Das Vergessen ist menschlich.", en: "Forgetting is human." },
+        { de: "Das Probieren ist wichtiger als das Perfekte.", en: "Trying is more important than perfection." },
+        { de: "Das Gute siegt am Ende.", en: "Good wins in the end." },
+        { de: "Das Böse verliert.", en: "Evil loses." },
+        { de: "Das Alte wird das Neue.", en: "The old becomes the new." },
+        { de: "Das Kleine kann Großes bewirken.", en: "The small can achieve great things." },
+        { de: "Das Unmögliche möglich machen.", en: "Make the impossible possible." },
+        { de: "Das Einfache ist oft das Beste.", en: "The simple is often the best." },
+        { de: "Das Hören von Musik entspannt mich.", en: "Listening to music relaxes me." },
+        { de: "Das Schreiben von E-Mails dauert lange.", en: "Writing emails takes a long time." },
+        { de: "Das Fahren bei Nacht ist anstrengend.", en: "Driving at night is tiring." },
+        { de: "Das Fotografieren ist sein Hobby.", en: "Photography is his hobby." },
+        { de: "Das Zeichnen ist ihre Leidenschaft.", en: "Drawing is her passion." },
+        { de: "Das Backen von Kuchen ist einfach.", en: "Baking cakes is easy." },
+        { de: "Das Finden einer Lösung ist schwierig.", en: "Finding a solution is difficult." },
+        { de: "Das Anfangen ist immer schwer.", en: "Starting is always hard." },
+        { de: "Das Aufhören ist noch schwieriger.", en: "Stopping is even harder." },
+        { de: "Das Neueste habe ich noch nicht gehört.", en: "I haven't heard the latest yet." },
+        { de: "Das Tollste war der Sonnenuntergang.", en: "The best part was the sunset." },
+        { de: "Das Teuerste ist nicht immer das Beste.", en: "The most expensive is not always the best." },
+    ];
+
+    const b2_indirect_speech = [
+        // Konjunktiv I (indirect speech)
+        { de: "Er sagt, er sei müde.", en: "He says he is tired." },
+        { de: "Er sagt, er habe keine Zeit.", en: "He says he has no time." },
+        { de: "Er sagt, er komme morgen.", en: "He says he is coming tomorrow." },
+        { de: "Er sagt, er wisse das nicht.", en: "He says he doesn't know that." },
+        { de: "Er sagt, er könne nicht kommen.", en: "He says he can't come." },
+        { de: "Er sagt, er müsse arbeiten.", en: "He says he has to work." },
+        { de: "Er sagt, er wolle helfen.", en: "He says he wants to help." },
+        { de: "Sie meint, das sei richtig.", en: "She thinks that is correct." },
+        { de: "Sie meint, er habe Recht.", en: "She thinks he is right." },
+        { de: "Sie behauptet, sie wisse nichts davon.", en: "She claims she knows nothing about it." },
+        { de: "Sie behauptet, sie habe das nicht gesagt.", en: "She claims she didn't say that." },
+        { de: "Sie sagt, sie komme später.", en: "She says she is coming later." },
+        { de: "Sie sagt, sie habe ihn gesehen.", en: "She says she saw him." },
+        { de: "Der Minister erklärt, die Situation sei unter Kontrolle.", en: "The minister explains the situation is under control." },
+        { de: "Die Zeitung berichtet, es gebe Probleme.", en: "The newspaper reports there are problems." },
+        { de: "Der Sprecher sagt, man arbeite an einer Lösung.", en: "The spokesperson says they are working on a solution." },
+        { de: "Die Lehrerin sagt, die Schüler müssten mehr lernen.", en: "The teacher says the students must study more." },
+        { de: "Er fragt, ob das stimme.", en: "He asks whether that is true." },
+        { de: "Er fragt, was passiert sei.", en: "He asks what happened." },
+        { de: "Er fragt, wann sie komme.", en: "He asks when she is coming." },
+        { de: "Der Arzt sagt, der Patient solle sich ausruhen.", en: "The doctor says the patient should rest." },
+        { de: "Der Chef sagt, alle Mitarbeiter sollten pünktlich sein.", en: "The boss says all employees should be on time." },
+        { de: "Sie erwähnt, sie habe in Berlin gewohnt.", en: "She mentions she lived in Berlin." },
+        { de: "Er betont, das sei sehr wichtig.", en: "He emphasizes that is very important." },
+        { de: "Sie gibt an, sie sei unschuldig.", en: "She states she is innocent." },
+        { de: "Man sagt, das Wetter werde besser.", en: "They say the weather will get better." },
+        { de: "Es heißt, er sei der beste Spieler.", en: "It is said that he is the best player." },
+        { de: "Laut dem Bericht seien die Zahlen gestiegen.", en: "According to the report, the numbers have risen." },
+        { de: "Er versichert, er werde kommen.", en: "He assures he will come." },
+        { de: "Sie verspricht, sie werde helfen.", en: "She promises she will help." },
+        { de: "Er behauptet, er wisse von nichts.", en: "He claims he knows nothing." },
+        { de: "Sie sagt, sie könne nicht kommen.", en: "She says she cannot come." },
+        { de: "Er meint, das würde nicht funktionieren.", en: "He thinks that would not work." },
+        { de: "Der Lehrer sagt, die Schüler sollten mehr üben.", en: "The teacher says the students should practice more." },
+        { de: "Die Ärztin sagt, ich solle mehr schlafen.", en: "The doctor says I should sleep more." },
+        { de: "Er fragt, ob wir morgen kommen könnten.", en: "He asks if we could come tomorrow." },
+        { de: "Sie fragt, wann die Besprechung sei.", en: "She asks when the meeting is." },
+        { de: "Der Chef sagt, er erwarte bessere Ergebnisse.", en: "The boss says he expects better results." },
+        { de: "Die Nachricht berichtet, es habe einen Unfall gegeben.", en: "The news reports there was an accident." },
+        { de: "Man sagt, er sei ein guter Lehrer.", en: "They say he is a good teacher." },
+        { de: "Es heißt, das Restaurant sei ausgezeichnet.", en: "It is said that the restaurant is excellent." },
+        { de: "Er erwähnt, er werde nächste Woche verreisen.", en: "He mentions he will travel next week." },
+        { de: "Sie erklärt, sie habe das schon erledigt.", en: "She explains she has already done that." },
+        { de: "Er betont, das sei sehr dringend.", en: "He emphasizes that is very urgent." },
+        { de: "Sie gibt an, sie sei unschuldig.", en: "She states she is innocent." },
+        { de: "Der Sprecher sagt, die Verhandlungen seien erfolgreich.", en: "The spokesperson says the negotiations are successful." },
+        { de: "Laut dem Bericht seien die Kosten gestiegen.", en: "According to the report, the costs have risen." },
+        { de: "Er berichtet, er habe alles gesehen.", en: "He reports he saw everything." },
+        { de: "Sie meint, es gebe keine Probleme.", en: "She thinks there are no problems." },
+        { de: "Der Minister erklärt, man arbeite an Lösungen.", en: "The minister explains they are working on solutions." },
+        { de: "Die Firma teilt mit, sie werde expandieren.", en: "The company announces it will expand." },
+        { de: "Er fragt, wie spät es sei.", en: "He asks what time it is." },
+        { de: "Sie will wissen, wo wir gewesen seien.", en: "She wants to know where we have been." },
+        { de: "Er sagt, er brauche mehr Zeit.", en: "He says he needs more time." },
+        { de: "Sie erklärt, der Plan sei geändert worden.", en: "She explains the plan has been changed." },
+        { de: "Er versichert, er werde pünktlich sein.", en: "He assures he will be on time." },
+        { de: "Sie behauptet, sie habe recht.", en: "She claims she is right." },
+        { de: "Der Richter sagt, der Angeklagte sei schuldig.", en: "The judge says the defendant is guilty." },
+        { de: "Die Zeitung schreibt, der Präsident werde zurücktreten.", en: "The newspaper writes the president will resign." },
+        { de: "Er fügt hinzu, es sei wichtig zu handeln.", en: "He adds it is important to act." },
+        { de: "Sie betont, sie habe ihr Bestes gegeben.", en: "She emphasizes she has done her best." },
+        { de: "Er gesteht, er habe einen Fehler gemacht.", en: "He admits he made a mistake." },
+        { de: "Sie leugnet, sie habe das gesagt.", en: "She denies she said that." },
+        { de: "Der Experte sagt, die Lage sei ernst.", en: "The expert says the situation is serious." },
+        { de: "Man behauptet, das Gerücht sei wahr.", en: "It is claimed that the rumor is true." },
+        { de: "Es wird gesagt, er sei verreist.", en: "It is said that he has traveled away." },
+        { de: "Sie erklärte, sie habe alles verstanden.", en: "She explained she had understood everything." },
+        { de: "Er sagte, er werde uns anrufen.", en: "He said he would call us." },
+        { de: "Sie meinte, das Problem sei gelöst.", en: "She thought the problem was solved." },
+    ];
 
     // ========== GENERATORS PER SECTION ==========
     const generators = {
 
         // ====== A1 ======
         "basic_word_order": function () {
-            const subj = pick(pools.subjects_simple);
-            const useTransitive = Math.random() > 0.4;
-            let de, en, words;
-
-            if (useTransitive) {
-                const verb = pick(pools.verbs_transitive);
-                const obj = pick(pools.objects_acc);
-                de = `${subj.de} ${verb.conj[subj.verb_form]} ${obj.de}.`;
-                const en_verb = (subj.verb_form === "3s") ? verb.en + "s" : verb.en;
-                en = `${subj.en} ${en_verb} ${obj.en}.`;
-                words = [subj.de, verb.conj[subj.verb_form], obj.de];
-            } else {
-                const verb = pick(pools.verbs_intransitive);
-                const time = pick(pools.times);
-                de = `${subj.de} ${verb.conj[subj.verb_form]} ${time.de}.`;
-                const en_verb = (subj.verb_form === "3s") ? verb.en + "s" : verb.en;
-                en = `${subj.en} ${en_verb} ${time.en}.`;
-                words = [subj.de, verb.conj[subj.verb_form], time.de];
-            }
-            return { prompt: en, answer: de, words: shuffleArray(words), hint: "Subject + Verb + Object/Time" };
+            const allSentences = [...a1_basic_word_order, ...a1_basic_extra];
+            const s = pick(allSentences);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Subject + Verb + Object (verb in 2nd position)" };
         },
 
         "simple_questions": function () {
-            const w = pick(pools.w_words);
-            const v = pick(pools.question_verbs);
-            const usedu = Math.random() > 0.5;
-
-            let de, en;
-            if (usedu) {
-                de = `${w.de} ${v.de_2s} du?`;
-                en = `${w.en} do you ${v.en}?`;
-                return { prompt: en, answer: de, words: shuffleArray([w.de, v.de_2s, "du"]), hint: "W-word + verb + subject" };
-            } else {
-                de = `${w.de} ${v.de_3s} er?`;
-                en = `${w.en} does he ${v.en}?`;
-                return { prompt: en, answer: de, words: shuffleArray([w.de, v.de_3s, "er"]), hint: "W-word + verb + subject" };
-            }
+            const s = pick(a1_simple_questions);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Questions: W-word + verb + subject OR verb first (yes/no)" };
         },
 
         "negation": function () {
-            const subj = pick(pools.subjects_simple);
-            const verb = pick(pools.verbs_transitive);
-            const obj = pick(pools.objects_kein);
+            const s = pick(a1_negation);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "nicht (verbs/adjectives) or kein/keine/keinen (nouns)" };
+        },
 
-            const de = `${subj.de} ${verb.conj[subj.verb_form]} ${obj.de_neg}.`;
-            const en_verb = (subj.verb_form === "3s") ? "doesn't " + verb.en : "don't " + verb.en;
-            const en_subj = (subj.verb_form === "3s") ? subj.en : subj.en;
-            const en = `${en_subj} ${en_verb} ${obj.en}.`;
-            const words = [subj.de, verb.conj[subj.verb_form], obj.de_neg];
-            return { prompt: en, answer: de, words: shuffleArray(words), hint: "kein/keine/keinen replaces ein/eine/einen for negation" };
+        "a1_sein_haben": function () {
+            const s = pick(a1_sein_haben);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "sein: bin/bist/ist/sind | haben: habe/hast/hat/haben" };
         },
 
         // ====== A2 ======
         "past_tense_perfekt": function () {
-            const subj = pick(pools.subjects_simple);
-            const useTransitive = Math.random() > 0.4;
-            let de, en, words;
-
-            if (useTransitive) {
-                const verb = pick(pools.verbs_transitive);
-                const obj = pick(pools.objects_acc);
-                const aux = haben_conj[subj.verb_form];
-                de = `${subj.de} ${aux} ${obj.de} ${verb.partizip}.`;
-                en = `${subj.en} ${verb.en === "eat" ? "ate" : verb.en + "ed"} ${obj.en}.`;
-                // Simplify English past - just show approximate
-                en = `${subj.en} has ${verb.partizip === verb.en ? verb.en + "ed" : verb.en + "ed"} ${obj.en}.`;
-                // Better: use a simple pattern
-                en = `${subj.en} ${verb.en.replace(/e$/, "")}ed ${obj.en}.`
-                    .replace("eated", "ate").replace("readed", "read").replace("writed", "wrote")
-                    .replace("taked", "took").replace("drinked", "drank").replace("buyed", "bought")
-                    .replace("searched for", "looked for");
-                words = [subj.de, aux, obj.de, verb.partizip];
-            } else {
-                const verb = pick(pools.verbs_intransitive);
-                const place = pick(pools.places);
-                const aux_conj = verb.aux === "sein" ? sein_conj : haben_conj;
-                const aux = aux_conj[subj.verb_form];
-                de = `${subj.de} ${aux} ${place.de} ${verb.partizip}.`;
-                en = `${subj.en} ${verb.en.replace(/e$/, "")}ed ${place.en}.`
-                    .replace("goed", "went").replace("comed", "came").replace("runed", "ran")
-                    .replace("sleeped", "slept").replace("swimed", "swam");
-                words = [subj.de, aux, place.de, verb.partizip];
-            }
-            return { prompt: en, answer: de, words: shuffleArray(words), hint: "haben/sein + ... + Partizip II at the end" };
+            const s = pick(a2_past_tense_perfekt);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "haben/sein + ... + Partizip II at the end" };
         },
 
         "modal_verbs": function () {
-            const subj = pick(pools.subjects_simple);
-            const modal = pick(pools.modals);
-            const useTransitive = Math.random() > 0.5;
-            let de, en, words;
-
-            if (useTransitive) {
-                const verb = pick(pools.verbs_transitive);
-                const obj = pick(pools.objects_acc);
-                de = `${subj.de} ${modal.conj[subj.verb_form]} ${obj.de} ${verb.inf}.`;
-                en = `${subj.en} ${modal.en} ${verb.en} ${obj.en}.`;
-                words = [subj.de, modal.conj[subj.verb_form], obj.de, verb.inf];
-            } else {
-                const verb = pick(pools.verbs_intransitive);
-                const place = pick(pools.places);
-                de = `${subj.de} ${modal.conj[subj.verb_form]} ${place.de} ${verb.inf}.`;
-                en = `${subj.en} ${modal.en} ${verb.inf} ${place.en}.`;
-                words = [subj.de, modal.conj[subj.verb_form], place.de, verb.inf];
-            }
-            return { prompt: en, answer: de, words: shuffleArray(words), hint: "Modal verb conjugated + infinitive at the end" };
+            const s = pick(a2_modal_verbs);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Modal verb (kann/muss/will/soll/darf) + infinitive at the end" };
         },
 
         "connectors_weil_dass": function () {
-            const useWeil = Math.random() > 0.5;
-            if (useWeil) {
-                const subj = pick([{de:"Ich",en:"I"},{de:"Er",en:"He"},{de:"Sie",en:"She"}]);
-                const adj = pick(pools.adjectives);
-                const reason = pick(pools.reasons);
-                let de, en;
-                if (reason.applies_to === "1s" && subj.de === "Ich") {
-                    de = `Ich bleibe zu Hause, weil ich ${reason.de_clause}.`;
-                    en = `I stay at home because I ${reason.en_clause}.`;
-                } else if (reason.applies_to === "3s" && (subj.de === "Er" || subj.de === "Sie")) {
-                    const pronoun = subj.de === "Er" ? "er" : "sie";
-                    de = `${subj.de} bleibt zu Hause, weil ${pronoun} ${reason.de_clause}.`;
-                    en = `${subj.en} stays at home because ${subj.en.toLowerCase()} ${reason.en_clause}.`;
-                } else if (reason.applies_to === "any") {
-                    de = `${subj.de} ${subj.de==="Ich"?"bleibe":"bleibt"} zu Hause, weil ${reason.de_clause}.`;
-                    en = `${subj.en} stay${subj.de==="Ich"?"":"s"} at home because ${reason.en_clause}.`;
-                } else {
-                    de = `Ich bleibe zu Hause, weil ich müde bin.`;
-                    en = `I stay at home because I am tired.`;
-                }
-                const words = de.replace(/[.,]/g, "").split(" ");
-                return { prompt: en, answer: de, words: shuffleArray(words), hint: "After 'weil', the verb goes to the END" };
-            } else {
-                const statements = [
-                    { de: "Ich denke, dass er nett ist.", en: "I think that he is nice." },
-                    { de: "Ich weiß, dass du Deutsch sprichst.", en: "I know that you speak German." },
-                    { de: "Er sagt, dass das Essen gut ist.", en: "He says that the food is good." },
-                    { de: "Sie glaubt, dass wir kommen.", en: "She believes that we are coming." },
-                    { de: "Ich hoffe, dass es morgen regnet.", en: "I hope that it rains tomorrow." },
-                    { de: "Wir wissen, dass er arbeitet.", en: "We know that he works." },
-                    { de: "Ich denke, dass sie müde ist.", en: "I think that she is tired." },
-                    { de: "Er sagt, dass er morgen kommt.", en: "He says that he comes tomorrow." },
-                ];
-                const stmt = pick(statements);
-                const words = stmt.de.replace(/[.,]/g, "").split(" ");
-                return { prompt: stmt.en, answer: stmt.de, words: shuffleArray(words), hint: "After 'dass', the verb goes to the END" };
-            }
+            const s = pick(a2_connectors_weil_dass);
+            const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
+            const hint = s.de.includes("weil") ? "weil: verb at the END" : "dass: verb at the END";
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint };
+        },
+
+        "a2_separable": function () {
+            const s = pick(a2_separable);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Separable prefix goes to the END" };
         },
 
         // ====== B1 ======
         "relative_clauses": function () {
-            const noun = pick(pools.rel_nouns);
-            const pred = pick(pools.rel_predicates_nom);
-            const main = pick(pools.main_predicates);
-            const de = `${noun.de}, ${noun.rel_nom} ${pred.de}, ${main.de}.`;
-            const en = `${noun.en} ${pred.en} ${main.en}.`;
-            const words = de.replace(/[.,]/g, "").split(" ").filter(w => w);
-            return { prompt: en, answer: de, words: shuffleArray(words), hint: "Relative pronoun matches gender; verb at end of relative clause" };
+            const s = pick(b1_relative_clauses);
+            const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Relative pronoun (der/die/das/den/dem) + verb at end" };
         },
 
         "konjunktiv2": function () {
-            const useWish = Math.random() > 0.4;
-            if (useWish) {
-                const s = pick(pools.wishes);
-                const words = s.de.replace(/[.,]/g, "").split(" ").filter(w => w);
-                return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "wäre = would be, hätte = would have, würde + infinitive" };
-            } else {
-                const s = pick(pools.polite_requests);
-                const words = s.de.replace(/[.,?]/g, "").split(" ").filter(w => w);
-                return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Könnte/Würde/Hätte for polite requests" };
-            }
+            const s = pick(b1_konjunktiv2);
+            const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "würde/wäre/hätte/könnte + infinitive (hypothetical)" };
         },
 
         "passive_voice": function () {
-            const item = pick(pools.passive_items);
-            const usePast = Math.random() > 0.5;
-            let de, en;
-            if (usePast) {
-                de = `${item.de_subj} wurde ${item.de_partizip}.`;
-                en = `${item.en_subj} was ${item.en_verb}.`;
-            } else {
-                de = `${item.de_subj} wird ${item.de_partizip}.`;
-                en = `${item.en_subj} is being ${item.en_verb}.`;
-            }
-            const words = de.replace(/[.]/g, "").split(" ").filter(w => w);
-            return { prompt: en, answer: de, words: shuffleArray(words), hint: "werden/wurde + Partizip II" };
+            const s = pick(b1_passive_voice);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "werden/wurde + Partizip II (passive)" };
+        },
+
+        "b1_wenn_als": function () {
+            const s = pick(b1_wenn_als);
+            const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
+            const hint = s.de.includes("Als ") ? "als: one-time past event, verb at end" : "wenn: repeated/future event, verb at end";
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint };
         },
 
         // ====== B2 ======
         "advanced_connectors": function () {
-            const type = Math.random();
-            let s;
-            if (type < 0.33) {
-                s = pick(pools.obwohl_sentences);
-            } else if (type < 0.66) {
-                s = pick(pools.trotzdem_sentences);
-            } else {
-                s = pick(pools.indem_sentences);
-            }
-            const words = s.de.replace(/[.,]/g, "").split(" ").filter(w => w);
-            let hint = "obwohl → verb at end; trotzdem → verb in 2nd position; indem → verb at end";
-            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint };
+            const s = pick(b2_advanced_connectors);
+            const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Complex connectors: obwohl, trotzdem, deshalb, falls, bevor, nachdem, während" };
         },
 
         "double_infinitive": function () {
-            const s = pick(pools.double_infinitive);
-            const words = s.de.replace(/[.]/g, "").split(" ").filter(w => w);
-            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "haben + ... + infinitive + modal (double infinitive at the end)" };
+            const s = pick(b2_double_infinitive);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "haben + ... + infinitive + modal (double infinitive)" };
         },
 
         "nominalization": function () {
-            const s = pick(pools.nominalization);
-            const words = s.de.replace(/[.]/g, "").split(" ").filter(w => w);
-            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Verb → das + capitalized infinitive (das Lesen, das Kochen, etc.)" };
+            const s = pick(b2_nominalization);
+            const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "das + capitalized verb/adjective (nominalization)" };
+        },
+
+        "b2_indirect_speech": function () {
+            const s = pick(b2_indirect_speech);
+            const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
+            return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Konjunktiv I: sei/habe/komme/wisse (indirect speech)" };
         },
     };
 
@@ -628,8 +1533,8 @@ const SentenceGenerator = (function () {
         if (!usedCombinations[sectionId]) usedCombinations[sectionId] = new Set();
         const used = usedCombinations[sectionId];
 
-        // Try up to 50 times to get a unique sentence
-        for (let attempt = 0; attempt < 50; attempt++) {
+        // Try up to 100 times to get a unique sentence
+        for (let attempt = 0; attempt < 100; attempt++) {
             const exercise = gen();
             const key = exercise.answer;
             if (!used.has(key)) {

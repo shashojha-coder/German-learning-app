@@ -3,6 +3,35 @@ function toggleMobileMenu() {
     document.getElementById('mobileMenu').classList.toggle('open');
 }
 
+/* ===== THEME TOGGLE ===== */
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const btn = document.querySelector('.theme-toggle');
+    if (btn) {
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+}
+
+// Initialize theme on page load
+(function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    // Update icon after DOM is ready
+    document.addEventListener('DOMContentLoaded', () => updateThemeIcon(theme));
+})();
+
 /* ===== TAB SWITCHING ===== */
 function switchTab(tabId, btn) {
     // Hide all tab contents at the same level
@@ -347,4 +376,144 @@ function revealUnlimited(sectionId) {
 function toggleUnlimitedHint(sectionId) {
     const hint = document.getElementById('uHint-' + sectionId);
     hint.style.display = hint.style.display === 'none' ? 'inline-block' : 'none';
+}
+
+/* ===== CANVAS-BASED BURST ANIMATION (5000 particles, smooth) ===== */
+function burstAndNavigate(event, href) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const container = document.getElementById('bubble-container');
+    if (!container) {
+        window.location.href = href;
+        return;
+    }
+    
+    // Create canvas for GPU-accelerated rendering
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+    document.body.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    const colors = ['#667eea', '#764ba2', '#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6'];
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    
+    const rect = event.target.getBoundingClientRect();
+    const clickX = event.clientX || (rect.left + rect.width / 2);
+    const clickY = event.clientY || (rect.top + rect.height / 2);
+    
+    // Create 5000 particles
+    const particles = [];
+    
+    // Expanding from click (1500)
+    for (let i = 0; i < 1500; i++) {
+        const angle = (Math.PI * 2 / 1500) * i + Math.random() * 0.3;
+        const speed = Math.random() * 8 + 3;
+        particles.push({
+            x: clickX,
+            y: clickY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: Math.random() * 6 + 2,
+            color: colors[i % colors.length],
+            alpha: 1,
+            decay: Math.random() * 0.02 + 0.015
+        });
+    }
+    
+    // Rising bubbles (1500)
+    for (let i = 0; i < 1500; i++) {
+        particles.push({
+            x: Math.random() * screenW,
+            y: screenH + Math.random() * 100,
+            vx: (Math.random() - 0.5) * 2,
+            vy: -(Math.random() * 6 + 4),
+            size: Math.random() * 5 + 2,
+            color: colors[i % colors.length],
+            alpha: 1,
+            decay: Math.random() * 0.015 + 0.01
+        });
+    }
+    
+    // Sparkles everywhere (1000)
+    for (let i = 0; i < 1000; i++) {
+        particles.push({
+            x: Math.random() * screenW,
+            y: Math.random() * screenH,
+            vx: (Math.random() - 0.5) * 3,
+            vy: (Math.random() - 0.5) * 3,
+            size: Math.random() * 4 + 1,
+            color: colors[i % colors.length],
+            alpha: 1,
+            decay: Math.random() * 0.03 + 0.02
+        });
+    }
+    
+    // Falling confetti (1000)
+    for (let i = 0; i < 1000; i++) {
+        particles.push({
+            x: Math.random() * screenW,
+            y: -Math.random() * 100,
+            vx: (Math.random() - 0.5) * 2,
+            vy: Math.random() * 5 + 3,
+            size: Math.random() * 5 + 2,
+            color: colors[i % colors.length],
+            alpha: 1,
+            decay: Math.random() * 0.012 + 0.008,
+            isRect: i % 2 === 0
+        });
+    }
+    
+    let animationId;
+    const startTime = performance.now();
+    
+    function animate() {
+        ctx.clearRect(0, 0, screenW, screenH);
+        
+        let alive = false;
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            if (p.alpha <= 0) continue;
+            
+            alive = true;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= p.decay;
+            
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.fillStyle = p.color;
+            
+            if (p.isRect) {
+                ctx.fillRect(p.x, p.y, p.size, p.size * 1.5);
+            } else {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        if (alive && performance.now() - startTime < 800) {
+            animationId = requestAnimationFrame(animate);
+        } else {
+            canvas.remove();
+        }
+    }
+    
+    animationId = requestAnimationFrame(animate);
+    
+    // Page transition
+    const mainContainer = document.querySelector('.container');
+    if (mainContainer) {
+        mainContainer.classList.add('page-transitioning');
+    }
+    
+    // Navigate
+    setTimeout(() => {
+        window.location.href = href;
+    }, 1500);
 }
