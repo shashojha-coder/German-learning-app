@@ -1,10 +1,30 @@
+// ===== GLOBAL ERROR BANNER =====
+function showError(msg) {
+    const el = document.getElementById('globalError');
+    if (el) {
+        el.textContent = msg;
+        el.style.display = '';
+        setTimeout(() => { el.style.display = 'none'; }, 6000);
+    } else {
+        alert(msg);
+    }
+}
+
+function hideError() {
+    const el = document.getElementById('globalError');
+    if (el) el.style.display = 'none';
+}
 // ====== AUDIO (TTS) SUPPORT ======
 function playAudio(text) {
-    if (!window.speechSynthesis) return;
-    const utter = new window.SpeechSynthesisUtterance(text);
-    utter.lang = 'de-DE';
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utter);
+    try {
+        if (!window.speechSynthesis) throw new Error('Speech synthesis not supported.');
+        const utter = new window.SpeechSynthesisUtterance(text);
+        utter.lang = 'de-DE';
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utter);
+    } catch (e) {
+        showError(e.message || 'Audio playback failed.');
+    }
 }
 
 function playQuizAudio(sectionId) {
@@ -31,7 +51,9 @@ function saveUnlimitedProgress(sectionId) {
             wrong: state.wrong,
             total: state.total
         }));
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+        showError('Could not save progress.');
+    }
 }
 
 function loadUnlimitedProgress(sectionId) {
@@ -56,7 +78,9 @@ function saveQuizProgress(sectionId) {
             correct: state.correct,
             total: state.total
         }));
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+        showError('Could not save quiz progress.');
+    }
 }
 
 function loadQuizProgress(sectionId) {
@@ -203,7 +227,10 @@ function showQuizWord(sectionId) {
 
 function checkQuiz(sectionId) {
     const state = quizState[sectionId];
-    if (!state || state.index >= state.words.length) return;
+    if (!state || state.index >= state.words.length) {
+        showError('Quiz state error. Please restart the quiz.');
+        return;
+    }
     const input = document.getElementById('quizInput-' + sectionId).value.trim().toLowerCase();
     const correct = state.words[state.index].en.toLowerCase();
     const feedback = document.getElementById('quizFeedback-' + sectionId);
@@ -306,41 +333,45 @@ function selectWord(tile, sectionId, exIndex) {
 
 /* ===== CHECK SENTENCE ===== */
 function checkSentence(sectionId, exIndex) {
-    const inputEl = document.getElementById('input-' + sectionId + '-' + exIndex);
-    const answerArea = document.getElementById('answer-' + sectionId + '-' + exIndex);
-    const feedback = document.getElementById('feedback-' + sectionId + '-' + exIndex);
-    const card = document.getElementById('ex-' + sectionId + '-' + exIndex);
-    const correct = inputEl.dataset.correct;
+    try {
+        const inputEl = document.getElementById('input-' + sectionId + '-' + exIndex);
+        const answerArea = document.getElementById('answer-' + sectionId + '-' + exIndex);
+        const feedback = document.getElementById('feedback-' + sectionId + '-' + exIndex);
+        const card = document.getElementById('ex-' + sectionId + '-' + exIndex);
+        const correct = inputEl.dataset.correct;
 
-    // Get answer from typed input or word bank
-    let userAnswer = inputEl.value.trim();
-    if (!userAnswer) {
-        const tiles = answerArea.querySelectorAll('.word-tile');
-        userAnswer = Array.from(tiles).map(t => t.textContent.trim()).join(' ');
+        // Get answer from typed input or word bank
+        let userAnswer = inputEl.value.trim();
+        if (!userAnswer) {
+            const tiles = answerArea.querySelectorAll('.word-tile');
+            userAnswer = Array.from(tiles).map(t => t.textContent.trim()).join(' ');
+        }
+        if (!userAnswer) {
+            feedback.textContent = 'Please build or type a sentence first.';
+            feedback.className = 'exercise-feedback incorrect';
+            return;
+        }
+
+        // Clean comparison
+        const clean = s => s.replace(/[.!?]/g, '').trim().toLowerCase();
+        const isCorrect = clean(userAnswer) === clean(correct);
+
+        if (isCorrect) {
+            feedback.textContent = '✅ Richtig! (Correct!)';
+            feedback.className = 'exercise-feedback correct';
+            card.classList.add('correct');
+            card.classList.remove('incorrect');
+        } else {
+            feedback.innerHTML = `❌ Not quite. Expected: <strong>${correct}</strong>`;
+            feedback.className = 'exercise-feedback incorrect';
+            card.classList.add('incorrect');
+            card.classList.remove('correct');
+        }
+
+        updateProgress(sectionId);
+    } catch (e) {
+        showError('An error occurred while checking your answer.');
     }
-    if (!userAnswer) {
-        feedback.textContent = 'Please build or type a sentence first.';
-        feedback.className = 'exercise-feedback incorrect';
-        return;
-    }
-
-    // Clean comparison
-    const clean = s => s.replace(/[.!?]/g, '').trim().toLowerCase();
-    const isCorrect = clean(userAnswer) === clean(correct);
-
-    if (isCorrect) {
-        feedback.textContent = '✅ Richtig! (Correct!)';
-        feedback.className = 'exercise-feedback correct';
-        card.classList.add('correct');
-        card.classList.remove('incorrect');
-    } else {
-        feedback.innerHTML = `❌ Not quite. Expected: <strong>${correct}</strong>`;
-        feedback.className = 'exercise-feedback incorrect';
-        card.classList.add('incorrect');
-        card.classList.remove('correct');
-    }
-
-    updateProgress(sectionId);
 }
 
 function revealAnswer(sectionId, exIndex) {
