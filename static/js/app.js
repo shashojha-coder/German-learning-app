@@ -1,3 +1,53 @@
+// ====== PERSISTENT PROGRESS HELPERS ======
+function saveUnlimitedProgress(sectionId) {
+    try {
+        const state = unlimitedState[sectionId];
+        if (!state) return;
+        localStorage.setItem('unlimited_' + sectionId, JSON.stringify({
+            correct: state.correct,
+            wrong: state.wrong,
+            total: state.total
+        }));
+    } catch (e) { /* ignore */ }
+}
+
+function loadUnlimitedProgress(sectionId) {
+    try {
+        const raw = localStorage.getItem('unlimited_' + sectionId);
+        if (!raw) return { correct: 0, wrong: 0, total: 0 };
+        const obj = JSON.parse(raw);
+        return {
+            correct: obj.correct || 0,
+            wrong: obj.wrong || 0,
+            total: obj.total || 0
+        };
+    } catch (e) { return { correct: 0, wrong: 0, total: 0 }; }
+}
+
+function saveQuizProgress(sectionId) {
+    try {
+        const state = quizState[sectionId];
+        if (!state) return;
+        localStorage.setItem('quiz_' + sectionId, JSON.stringify({
+            index: state.index,
+            correct: state.correct,
+            total: state.total
+        }));
+    } catch (e) { /* ignore */ }
+}
+
+function loadQuizProgress(sectionId) {
+    try {
+        const raw = localStorage.getItem('quiz_' + sectionId);
+        if (!raw) return { index: 0, correct: 0, total: 0 };
+        const obj = JSON.parse(raw);
+        return {
+            index: obj.index || 0,
+            correct: obj.correct || 0,
+            total: obj.total || 0
+        };
+    } catch (e) { return { index: 0, correct: 0, total: 0 }; }
+}
 /* ===== MOBILE MENU ===== */
 function toggleMobileMenu() {
     document.getElementById('mobileMenu').classList.toggle('open');
@@ -19,6 +69,19 @@ function updateThemeIcon(theme) {
         btn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 }
+    if (!unlimitedState[sectionId]) {
+        const stats = loadUnlimitedProgress(sectionId);
+        unlimitedState[sectionId] = {
+            exercise: exercise,
+            answered: false,
+            correct: stats.correct,
+            wrong: stats.wrong,
+            total: stats.total
+        };
+    } else {
+        unlimitedState[sectionId].exercise = exercise;
+        unlimitedState[sectionId].answered = false;
+    }
 
 // Initialize theme on page load
 (function initTheme() {
@@ -139,6 +202,30 @@ document.addEventListener('DOMContentLoaded', function() {
         const shuffled = Array.from(bank.children).sort(() => Math.random() - 0.5);
         shuffled.forEach(el => bank.appendChild(el));
     });
+
+    // Restore unlimited progress stats on load
+    if (typeof sentenceData !== 'undefined') {
+        sentenceData.forEach(function(sec) {
+            const stats = loadUnlimitedProgress(sec.id);
+            document.getElementById('uCorrect-' + sec.id).textContent = '✅ ' + stats.correct;
+            document.getElementById('uWrong-' + sec.id).textContent = '❌ ' + stats.wrong;
+            document.getElementById('uTotal-' + sec.id).textContent = '📝 ' + stats.total + ' practiced';
+            const pct = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+            const fill = document.getElementById('uProgress-' + sec.id);
+            const scoreText = document.getElementById('uScoreText-' + sec.id);
+            if (fill) fill.style.width = pct + '%';
+            if (scoreText) scoreText.textContent = stats.correct + ' / ' + stats.total + ' correct (' + pct + '%)';
+        });
+    }
+
+    // Restore quiz progress stats on load
+    if (typeof vocabData !== 'undefined') {
+        vocabData.forEach(function(sec) {
+            const stats = loadQuizProgress(sec.id);
+            const score = document.getElementById('quizScore-' + sec.id);
+            if (score) score.textContent = `Score: ${stats.correct} / ${stats.total}`;
+        });
+    }
 });
 
 /* ===== SENTENCE BUILDING (WORD BANK) ===== */
