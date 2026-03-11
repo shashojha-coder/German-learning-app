@@ -164,13 +164,24 @@ function startQuiz(sectionId) {
     const section = vocabData.find(s => s.id === sectionId);
     if (!section) return;
     const words = [...section.words].sort(() => Math.random() - 0.5);
-    quizState[sectionId] = { words, index: 0, correct: 0, total: 0 };
+    quizState[sectionId] = {
+        words,
+        index: 0,
+        correct: 0,
+        total: 0,
+        missed: [], // store missed word indices
+        streak: 0 // correct answer streak
+    };
     document.getElementById('quiz-' + sectionId).classList.add('active');
     showQuizWord(sectionId);
 }
 
 function showQuizWord(sectionId) {
     const state = quizState[sectionId];
+    // If missed words exist, prioritize them
+    if (state.missed && state.missed.length > 0) {
+        state.index = state.missed.shift();
+    }
     if (!state || state.index >= state.words.length) {
         document.getElementById('quizWord-' + sectionId).textContent =
             `Done! ${state.correct}/${state.total} correct 🎉`;
@@ -182,6 +193,12 @@ function showQuizWord(sectionId) {
     document.getElementById('quizInput-' + sectionId).style.display = '';
     document.getElementById('quizInput-' + sectionId).focus();
     document.getElementById('quizFeedback-' + sectionId).textContent = '';
+    // If streak >= 3, hide placeholder to increase challenge
+    if (state.streak >= 3) {
+        document.getElementById('quizInput-' + sectionId).placeholder = '';
+    } else {
+        document.getElementById('quizInput-' + sectionId).placeholder = 'Type the English meaning...';
+    }
 }
 
 function checkQuiz(sectionId) {
@@ -201,21 +218,31 @@ function checkQuiz(sectionId) {
     }
     document.getElementById('quizScore-' + sectionId).textContent =
         `Score: ${state.correct} / ${state.total}`;
-    state.index++;
-    setTimeout(() => showQuizWord(sectionId), 1200);
-}
-
-function nextQuiz(sectionId) {
-    const state = quizState[sectionId];
-    if (!state) return;
-    state.index++;
-    showQuizWord(sectionId);
-}
-
-/* ===== SHUFFLE WORD BANKS ON PAGE LOAD ===== */
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.word-bank').forEach(function(bank) {
-        const tiles = Array.from(bank.children);
+    state.total++;
+    if (input === correct || (correct.includes(input) && input.length > 2)) {
+        state.correct++;
+        state.streak = (state.streak || 0) + 1;
+        feedback.textContent = '✅ Correct!';
+        feedback.style.color = '#4CAF50';
+    } else {
+        feedback.textContent = `❌ Answer: ${state.words[state.index].en}`;
+        feedback.style.color = '#f44336';
+        // Add missed index to repeat soon
+        if (!state.missed) state.missed = [];
+        state.missed.push(state.index);
+        state.streak = 0;
+    }
+    document.getElementById('quizScore-' + sectionId).textContent =
+        `Score: ${state.correct} / ${state.total}`;
+    // Save progress
+    saveQuizProgress(sectionId);
+    // Next: if missed, repeat soon; else, go to next
+    if (state.missed && state.missed.length > 0) {
+        setTimeout(() => showQuizWord(sectionId), 1200);
+    } else {
+        state.index++;
+        setTimeout(() => showQuizWord(sectionId), 1200);
+    }
         for (let i = tiles.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             bank.appendChild(tiles[j]);
