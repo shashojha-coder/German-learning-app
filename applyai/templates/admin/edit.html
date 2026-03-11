@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Edit Content{% endblock %}
+{% block content %}
+<h1>Edit Content JSON</h1>
+<form method="post">
+    <textarea name="content" rows="20" style="width:100%;font-family:monospace;">{{ content }}</textarea>
+    <br>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-sm">Back to Dashboard</a>
+</form>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="flash {{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% endblock %}

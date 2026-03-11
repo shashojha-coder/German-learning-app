@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h1>Admin Dashboard</h1>
+<p><a href="{{ url_for('admin.edit_content') }}" class="btn btn-primary">Edit Content JSON</a></p>
+<h2>Current Content (Preview)</h2>
+<pre style="max-height:400px;overflow:auto;background:#f8f8f8;padding:1em;border-radius:8px;">{{ content|tojson(indent=2) }}</pre>
+{% endblock %}

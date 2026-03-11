@@ -1001,6 +1001,56 @@ input { font-family: inherit; outline: none; }
     .level-tiles { gap: 1.5rem; }
     .level-tile { padding: 1.8rem; }
     .tile-title { font-size: 1.5rem; }
+    .navbar, .nav-links { flex-direction: column; align-items: flex-start; }
+    .navbar { padding: 0.7rem 1rem; }
+    .nav-links { gap: 0.5rem; }
+    .nav-dropdown, .nav-dropdown-content { width: 100%; }
+    .nav-dropdown-content { position: static; box-shadow: none; }
+    .mobile-menu-btn { font-size: 2rem; padding: 0.5rem 1rem; }
+    .mobile-menu { font-size: 1.1rem; }
+    .page-header { padding: 1rem 0.5rem; margin-bottom: 1.2rem; }
+    .page-header h1 { font-size: 1.3rem; }
+    .page-header p { font-size: 0.95rem; }
+    .level-nav { gap: 0.3rem; }
+    .level-nav-btn { font-size: 0.8rem; padding: 0.4rem 0.7rem; }
+    .section-header { flex-direction: column; gap: 0.5rem; align-items: stretch; }
+    .section-header h2 { font-size: 1.1rem; }
+    .section-controls { flex-direction: column; gap: 0.3rem; }
+    .section-tabs { gap: 0.3rem; padding: 0.2rem; }
+    .tab-btn { font-size: 0.8rem; padding: 0.4rem 0.7rem; }
+    .vocab-grid { grid-template-columns: 1fr; gap: 0.7rem; }
+    .vocab-card { height: 140px; }
+    .vocab-front, .vocab-back { padding: 0.7rem; font-size: 0.95rem; }
+    .vocab-de, .vocab-en { font-size: 1.1rem; }
+    .vocab-example { font-size: 0.75rem; }
+    .quiz-section, .unlimited-practice, .exercise-card { padding: 1rem; }
+    .quiz-word { font-size: 1.3rem; }
+    .quiz-input, .sentence-input { font-size: 0.95rem; padding: 0.6rem 1rem; }
+    .quiz-buttons, .exercise-actions { flex-direction: column; gap: 0.5rem; }
+    .word-bank, .answer-area { gap: 0.3rem; padding: 0.5rem; }
+    .word-tile { font-size: 0.9rem; padding: 0.4rem 0.7rem; }
+    .footer { padding: 1rem; font-size: 0.8rem; }
+    .tips-section h2 { font-size: 1.2rem; }
+    .tips-grid { gap: 0.7rem; }
+    .tip-card { padding: 1rem; }
+    .btn, .btn-sm { font-size: 0.85rem; padding: 0.5rem 1rem; }
+    .audio-btn { font-size: 1.2rem; padding: 0.3rem 0.7rem; }
+    .breadcrumb { font-size: 0.7rem; }
+    .progress-bar { height: 8px; }
+    .section-score { padding: 0.7rem; }
+    .prompt-text { font-size: 1.1rem; }
+    .stat-badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; }
+    .exercise-feedback, .quiz-feedback { font-size: 0.95rem; padding: 0.4rem; }
+    .global-error { font-size: 0.9rem; padding: 0.5rem; }
+    .tile-link { font-size: 0.9rem; padding: 0.7rem 1rem; }
+    .tile-badge { font-size: 0.9rem; padding: 0.2rem 0.7rem; }
+    .tile-icon { font-size: 2rem; }
+    .grammar-box { padding: 1rem; }
+    .unlimited-header { flex-direction: column; gap: 0.5rem; align-items: stretch; }
+    .unlimited-stats { gap: 0.3rem; }
+    .unlimited-card { padding: 1rem; }
+    .exercise-prompt { padding: 0.7rem 1rem; }
+    .mobile-section-title { font-size: 1rem; margin: 0.5rem 0 0.2rem 0; }
 }
     .word-line { font-size: 1.2rem; }
 }

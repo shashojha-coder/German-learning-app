@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<h1>Admin Login</h1>
+<form method="post" style="max-width:400px;margin:auto;">
+    <div style="margin-bottom:1em;">
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" class="quiz-input" required autofocus>
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for category, message in messages %}
+      <li class="flash {{ category }}">{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+{% endblock %}
