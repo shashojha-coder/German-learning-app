@@ -10,13 +10,6 @@ import os
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
-# Register admin blueprint (content management)
-try:
-    from applyai.admin.routes import admin_bp
-    app.register_blueprint(admin_bp)
-except Exception as e:
-    print(f"[WARN] Admin interface not loaded: {e}")
-
 # Load learning data (cached in memory)
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "content.json")
 _cached_data = None
