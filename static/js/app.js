@@ -1,3 +1,26 @@
+// ====== AUDIO (TTS) SUPPORT ======
+function playAudio(text) {
+    if (!window.speechSynthesis) return;
+    const utter = new window.SpeechSynthesisUtterance(text);
+    utter.lang = 'de-DE';
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+}
+
+function playQuizAudio(sectionId) {
+    if (typeof quizState === 'undefined' || !quizState[sectionId]) return;
+    const state = quizState[sectionId];
+    if (!state.words || state.index >= state.words.length) return;
+    const word = state.words[state.index]?.de;
+    if (word) playAudio(word);
+}
+
+function playSentenceAudio(sectionId) {
+    if (typeof unlimitedState === 'undefined' || !unlimitedState[sectionId]) return;
+    const state = unlimitedState[sectionId];
+    const sentence = state.exercise?.answer;
+    if (sentence) playAudio(sentence);
+}
 // ====== PERSISTENT PROGRESS HELPERS ======
 function saveUnlimitedProgress(sectionId) {
     try {

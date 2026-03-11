@@ -49,6 +49,7 @@
             <div class="vocab-card-inner">
                 <div class="vocab-front">
                     <span class="vocab-de">{{ word.de }}</span>
+                    <button class="audio-btn" aria-label="Play pronunciation" onclick="playAudio('{{ word.de|escapejs }}')">🔊</button>
                     <span class="vocab-hint">Click to reveal</span>
                 </div>
                 <div class="vocab-back">
@@ -70,6 +71,7 @@
         <div class="quiz-container" id="quiz-{{ sec.id }}" role="region" aria-labelledby="quiz-label-{{ sec.id }}">
             <div class="quiz-card">
                 <div class="quiz-word" id="quizWord-{{ sec.id }}" aria-live="polite">—</div>
+                                <button class="audio-btn" aria-label="Play pronunciation" onclick="playQuizAudio('{{ sec.id }}')">🔊</button>
                 <input type="text" class="quiz-input" id="quizInput-{{ sec.id }}" 
                        placeholder="Type the English meaning..." 
                        aria-label="Type the English meaning"
