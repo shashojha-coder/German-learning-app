@@ -36,16 +36,16 @@
 {% for sec in level.vocab_sections %}
 <div class="vocab-section tab-content {% if loop.first %}active{% endif %}" id="tab-{{ sec.id }}">
     <div class="section-header">
-        <h2>{{ sec.title }}</h2>
-        <div class="section-controls">
-            <button class="btn btn-sm" onclick="toggleAll('{{ sec.id }}')">Show/Hide All</button>
-            <button class="btn btn-sm" onclick="shuffleCards('{{ sec.id }}')">🔀 Shuffle</button>
+        <h2 id="vocab-label-{{ sec.id }}">{{ sec.title }}</h2>
+        <div class="section-controls" role="group" aria-label="Vocab controls">
+            <button class="btn btn-sm" onclick="toggleAll('{{ sec.id }}')" aria-label="Show or hide all cards">Show/Hide All</button>
+            <button class="btn btn-sm" onclick="shuffleCards('{{ sec.id }}')" aria-label="Shuffle cards">🔀 Shuffle</button>
         </div>
     </div>
 
-    <div class="vocab-grid" id="grid-{{ sec.id }}">
+    <div class="vocab-grid" id="grid-{{ sec.id }}" role="list" aria-labelledby="vocab-label-{{ sec.id }}">
         {% for word in sec.words %}
-        <div class="vocab-card" onclick="flipCard(this)">
+        <div class="vocab-card" onclick="flipCard(this)" role="listitem" tabindex="0" aria-label="Vocab card: {{ word.de }} means {{ word.en }}">
             <div class="vocab-card-inner">
                 <div class="vocab-front">
                     <span class="vocab-de">{{ word.de }}</span>
@@ -65,20 +65,21 @@
 
     <!-- Flashcard Quiz Mode -->
     <div class="quiz-section">
-        <h3>🧠 Quick Quiz – {{ sec.title }}</h3>
+        <h3 id="quiz-label-{{ sec.id }}">🧠 Quick Quiz – {{ sec.title }}</h3>
         <p>Type the English meaning of the German word shown.</p>
-        <div class="quiz-container" id="quiz-{{ sec.id }}">
+        <div class="quiz-container" id="quiz-{{ sec.id }}" role="region" aria-labelledby="quiz-label-{{ sec.id }}">
             <div class="quiz-card">
-                <div class="quiz-word" id="quizWord-{{ sec.id }}">—</div>
+                <div class="quiz-word" id="quizWord-{{ sec.id }}" aria-live="polite">—</div>
                 <input type="text" class="quiz-input" id="quizInput-{{ sec.id }}" 
                        placeholder="Type the English meaning..." 
+                       aria-label="Type the English meaning"
                        onkeypress="if(event.key==='Enter') checkQuiz('{{ sec.id }}')">
-                <div class="quiz-buttons">
+                <div class="quiz-buttons" role="group" aria-label="Quiz controls">
                     <button class="btn btn-primary" style="background: {{ level.color }};" 
-                            onclick="checkQuiz('{{ sec.id }}')">Check</button>
-                    <button class="btn btn-sm" onclick="nextQuiz('{{ sec.id }}')">Skip →</button>
+                            onclick="checkQuiz('{{ sec.id }}')" aria-label="Check answer">Check</button>
+                    <button class="btn btn-sm" onclick="nextQuiz('{{ sec.id }}')" aria-label="Skip word">Skip →</button>
                 </div>
-                <div class="quiz-feedback" id="quizFeedback-{{ sec.id }}"></div>
+                <div class="quiz-feedback" id="quizFeedback-{{ sec.id }}" role="status" aria-live="polite"></div>
                 <div class="quiz-score" id="quizScore-{{ sec.id }}">Score: 0 / 0</div>
             </div>
         </div>

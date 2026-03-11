@@ -43,26 +43,27 @@
 
     <!-- ♾️ UNLIMITED PRACTICE MODE -->
     <div class="unlimited-practice" id="unlimited-{{ sec.id }}">
+
         <div class="unlimited-header">
-            <h3>♾️ Unlimited Practice</h3>
-            <div class="unlimited-stats">
+            <h3 id="unlimited-label-{{ sec.id }}">♾️ Unlimited Practice</h3>
+            <div class="unlimited-stats" aria-label="Practice stats" role="status">
                 <span class="stat-badge correct-badge" id="uCorrect-{{ sec.id }}">✅ 0</span>
                 <span class="stat-badge wrong-badge" id="uWrong-{{ sec.id }}">❌ 0</span>
                 <span class="stat-badge total-badge" id="uTotal-{{ sec.id }}">📝 0 practiced</span>
             </div>
         </div>
 
-        <div class="unlimited-card" id="uCard-{{ sec.id }}">
-            <div class="exercise-prompt">
+        <div class="unlimited-card" id="uCard-{{ sec.id }}" role="region" aria-labelledby="unlimited-label-{{ sec.id }}">
+            <div class="exercise-prompt" role="heading" aria-level="4">
                 <span class="prompt-label">Translate to German:</span>
                 <span class="prompt-text" id="uPrompt-{{ sec.id }}">Click "Next Sentence" to begin!</span>
             </div>
 
             <!-- Word bank -->
-            <div class="word-bank" id="uBank-{{ sec.id }}"></div>
+            <div class="word-bank" id="uBank-{{ sec.id }}" role="listbox" aria-label="Word bank" tabindex="0"></div>
 
             <!-- Answer area -->
-            <div class="answer-area" id="uAnswer-{{ sec.id }}">
+            <div class="answer-area" id="uAnswer-{{ sec.id }}" role="group" aria-label="Your answer">
                 <span class="answer-placeholder">Click words above to build your sentence...</span>
             </div>
 
@@ -71,26 +72,27 @@
                 <span class="or-divider">— or type your answer —</span>
                 <input type="text" class="sentence-input" id="uInput-{{ sec.id }}"
                        placeholder="Type the German sentence..."
+                       aria-label="Type your answer"
                        onkeypress="if(event.key==='Enter') checkUnlimited('{{ sec.id }}')">
             </div>
 
             <!-- Hint -->
             <div class="hint-section">
-                <button class="btn btn-sm hint-btn" onclick="toggleUnlimitedHint('{{ sec.id }}')">💡 Show Hint</button>
+                <button class="btn btn-sm hint-btn" onclick="toggleUnlimitedHint('{{ sec.id }}')" aria-label="Show hint">💡 Show Hint</button>
                 <span class="hint-text" id="uHint-{{ sec.id }}" style="display:none;"></span>
             </div>
 
             <!-- Actions -->
-            <div class="exercise-actions">
+            <div class="exercise-actions" role="group" aria-label="Actions">
                 <button class="btn btn-primary" style="background: {{ level.color }};"
-                        onclick="checkUnlimited('{{ sec.id }}')">Check Answer ✓</button>
-                <button class="btn btn-sm" onclick="clearUnlimitedAnswer('{{ sec.id }}')">🔄 Clear</button>
-                <button class="btn btn-sm" onclick="revealUnlimited('{{ sec.id }}')">Reveal Answer</button>
-                <button class="btn btn-sm btn-next" onclick="nextUnlimited('{{ sec.id }}')" id="uNextBtn-{{ sec.id }}">
+                        onclick="checkUnlimited('{{ sec.id }}')" aria-label="Check answer">Check Answer ✓</button>
+                <button class="btn btn-sm" onclick="clearUnlimitedAnswer('{{ sec.id }}')" aria-label="Clear answer">🔄 Clear</button>
+                <button class="btn btn-sm" onclick="revealUnlimited('{{ sec.id }}')" aria-label="Reveal answer">Reveal Answer</button>
+                <button class="btn btn-sm btn-next" onclick="nextUnlimited('{{ sec.id }}')" id="uNextBtn-{{ sec.id }}" aria-label="Next sentence">
                     Next Sentence →
                 </button>
             </div>
-            <div class="exercise-feedback" id="uFeedback-{{ sec.id }}"></div>
+            <div class="exercise-feedback" id="uFeedback-{{ sec.id }}" role="status" aria-live="polite"></div>
         </div>
 
         <!-- Progress bar -->
