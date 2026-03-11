@@ -378,6 +378,19 @@ function toggleUnlimitedHint(sectionId) {
     hint.style.display = hint.style.display === 'none' ? 'inline-block' : 'none';
 }
 
+function clearUnlimitedAnswer(sectionId) {
+    // Reset word bank tiles
+    const bank = document.getElementById('uBank-' + sectionId);
+    bank.querySelectorAll('.word-tile.used').forEach(function(tile) {
+        tile.classList.remove('used');
+    });
+    // Reset answer area
+    const answerArea = document.getElementById('uAnswer-' + sectionId);
+    answerArea.innerHTML = '<span class="answer-placeholder">Click words above to build your sentence...</span>';
+    // Clear typed input
+    document.getElementById('uInput-' + sectionId).value = '';
+}
+
 /* ===== CANVAS-BASED BURST ANIMATION (5000 particles, smooth) ===== */
 function burstAndNavigate(event, href) {
     event.preventDefault();
@@ -407,12 +420,12 @@ function burstAndNavigate(event, href) {
     const clickX = event.clientX || (rect.left + rect.width / 2);
     const clickY = event.clientY || (rect.top + rect.height / 2);
     
-    // Create 5000 particles
+    // Create ~600 particles (lightweight, smooth on mobile)
     const particles = [];
     
-    // Expanding from click (1500)
-    for (let i = 0; i < 1500; i++) {
-        const angle = (Math.PI * 2 / 1500) * i + Math.random() * 0.3;
+    // Expanding from click (200)
+    for (let i = 0; i < 200; i++) {
+        const angle = (Math.PI * 2 / 200) * i + Math.random() * 0.3;
         const speed = Math.random() * 8 + 3;
         particles.push({
             x: clickX,
@@ -426,8 +439,8 @@ function burstAndNavigate(event, href) {
         });
     }
     
-    // Rising bubbles (1500)
-    for (let i = 0; i < 1500; i++) {
+    // Rising bubbles (150)
+    for (let i = 0; i < 150; i++) {
         particles.push({
             x: Math.random() * screenW,
             y: screenH + Math.random() * 100,
@@ -440,8 +453,8 @@ function burstAndNavigate(event, href) {
         });
     }
     
-    // Sparkles everywhere (1000)
-    for (let i = 0; i < 1000; i++) {
+    // Sparkles everywhere (150)
+    for (let i = 0; i < 150; i++) {
         particles.push({
             x: Math.random() * screenW,
             y: Math.random() * screenH,
@@ -454,8 +467,8 @@ function burstAndNavigate(event, href) {
         });
     }
     
-    // Falling confetti (1000)
-    for (let i = 0; i < 1000; i++) {
+    // Falling confetti (100)
+    for (let i = 0; i < 100; i++) {
         particles.push({
             x: Math.random() * screenW,
             y: -Math.random() * 100,
@@ -512,8 +525,8 @@ function burstAndNavigate(event, href) {
         mainContainer.classList.add('page-transitioning');
     }
     
-    // Navigate
+    // Navigate (quick transition)
     setTimeout(() => {
         window.location.href = href;
-    }, 1500);
+    }, 600);
 }

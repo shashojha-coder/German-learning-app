@@ -84,6 +84,7 @@
             <div class="exercise-actions">
                 <button class="btn btn-primary" style="background: {{ level.color }};"
                         onclick="checkUnlimited('{{ sec.id }}')">Check Answer ✓</button>
+                <button class="btn btn-sm" onclick="clearUnlimitedAnswer('{{ sec.id }}')">🔄 Clear</button>
                 <button class="btn btn-sm" onclick="revealUnlimited('{{ sec.id }}')">Reveal Answer</button>
                 <button class="btn btn-sm btn-next" onclick="nextUnlimited('{{ sec.id }}')" id="uNextBtn-{{ sec.id }}">
                     Next Sentence →

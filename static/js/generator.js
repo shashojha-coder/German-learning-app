@@ -1416,12 +1416,111 @@ const SentenceGenerator = (function () {
         { de: "Sie meinte, das Problem sei gelöst.", en: "She thought the problem was solved." },
     ];
 
+    // ========== VOCAB-BASED COMPLEX SENTENCES ==========
+    // These use vocabulary words from the vocab sections to build more complex practice
+
+    const a1_vocab_complex = [
+        // Combining greetings + people + everyday actions
+        { de: "Guten Morgen, meine Mutter trinkt Kaffee.", en: "Good morning, my mother drinks coffee." },
+        { de: "Mein Vater sagt Auf Wiedersehen und geht zur Arbeit.", en: "My father says goodbye and goes to work." },
+        { de: "Die Frau sagt Danke und nimmt das Brot.", en: "The woman says thank you and takes the bread." },
+        { de: "Das Kind sagt Bitte und bekommt einen Apfel.", en: "The child says please and gets an apple." },
+        { de: "Meine Schwester sagt Guten Abend und kocht Suppe.", en: "My sister says good evening and cooks soup." },
+        { de: "Mein Bruder sagt Tschüss und spielt Fußball.", en: "My brother says bye and plays football." },
+        { de: "Die Großmutter sagt Guten Tag und liest ein Buch.", en: "The grandmother says good day and reads a book." },
+        { de: "Meine Eltern trinken Tee und essen Kuchen.", en: "My parents drink tea and eat cake." },
+        { de: "Der Mann kauft drei Äpfel und zwei Brote.", en: "The man buys three apples and two loaves of bread." },
+        { de: "Entschuldigung, wo ist der Supermarkt?", en: "Excuse me, where is the supermarket?" },
+        { de: "Ja, meine Mutter kocht jeden Tag.", en: "Yes, my mother cooks every day." },
+        { de: "Nein, mein Großvater schläft noch nicht.", en: "No, my grandfather is not sleeping yet." },
+        { de: "Zwei Kinder spielen und drei Kinder lesen.", en: "Two children play and three children read." },
+        { de: "Mein Vater arbeitet und meine Mutter kocht.", en: "My father works and my mother cooks." },
+        { de: "Das Baby schläft und die Schwester lernt.", en: "The baby sleeps and the sister studies." },
+        { de: "Der Bruder spielt Gitarre und singt ein Lied.", en: "The brother plays guitar and sings a song." },
+        { de: "Fünf Kinder trinken Milch und essen Brot.", en: "Five children drink milk and eat bread." },
+        { de: "Guten Morgen, ich heiße Anna und ich lerne Deutsch.", en: "Good morning, my name is Anna and I learn German." },
+        { de: "Der Mann und die Frau gehen ins Restaurant.", en: "The man and the woman go to the restaurant." },
+        { de: "Meine Familie isst zusammen und wir sind glücklich.", en: "My family eats together and we are happy." },
+    ];
+
+    const a2_vocab_complex = [
+        // Past tense + daily life vocab + connectors
+        { de: "Ich habe gestern im Supermarkt eingekauft, weil ich Brot brauchte.", en: "I shopped at the supermarket yesterday because I needed bread." },
+        { de: "Mein Vater hat das Auto repariert und ich habe ihm geholfen.", en: "My father repaired the car and I helped him." },
+        { de: "Meine Mutter hat Kuchen gebacken, weil meine Großmutter zu Besuch kommt.", en: "My mother baked cake because my grandmother is coming to visit." },
+        { de: "Ich musste zum Arzt gehen, weil ich krank war.", en: "I had to go to the doctor because I was sick." },
+        { de: "Er wollte ins Kino gehen, aber er hatte keine Zeit.", en: "He wanted to go to the cinema but he had no time." },
+        { de: "Darf ich eine Tasse Kaffee bestellen?", en: "May I order a cup of coffee?" },
+        { de: "Ich kann nicht kommen, weil ich arbeiten muss.", en: "I can't come because I have to work." },
+        { de: "Sie möchte Deutsch lernen, weil sie in Berlin wohnen will.", en: "She would like to learn German because she wants to live in Berlin." },
+        { de: "Wir sind gestern nach München gefahren und haben das Museum besucht.", en: "We went to Munich yesterday and visited the museum." },
+        { de: "Ich habe meine Schwester angerufen, weil sie Geburtstag hatte.", en: "I called my sister because she had her birthday." },
+        { de: "Ich bin heute früh aufgestanden und habe Frühstück gemacht.", en: "I got up early today and made breakfast." },
+        { de: "Die Kinder durften nicht draußen spielen, weil es geregnet hat.", en: "The children were not allowed to play outside because it rained." },
+        { de: "Mein Bruder hat Fußball gespielt und danach Wasser getrunken.", en: "My brother played football and then drank water." },
+        { de: "Ich glaube, dass mein Großvater morgen kommt.", en: "I believe that my grandfather is coming tomorrow." },
+        { de: "Sie hat eine neue Wohnung gefunden, die drei Zimmer hat.", en: "She found a new apartment that has three rooms." },
+        { de: "Ich muss einkaufen gehen, weil wir keine Milch mehr haben.", en: "I have to go shopping because we don't have any milk left." },
+        { de: "Er hat gesagt, dass er morgen nicht arbeiten muss.", en: "He said that he doesn't have to work tomorrow." },
+        { de: "Ich sollte mehr Sport machen, weil ich gesund bleiben will.", en: "I should do more sports because I want to stay healthy." },
+        { de: "Wir wollen nächsten Sommer nach Italien reisen.", en: "We want to travel to Italy next summer." },
+        { de: "Ich habe ein neues Buch gelesen, das sehr interessant war.", en: "I read a new book that was very interesting." },
+    ];
+
+    const b1_vocab_complex = [
+        // Relative clauses + Konjunktiv + wenn/als with rich vocab
+        { de: "Der Arzt, der mich untersucht hat, sagt, dass ich gesund bin.", en: "The doctor who examined me says that I am healthy." },
+        { de: "Wenn ich mehr Geld hätte, würde ich ein großes Haus kaufen.", en: "If I had more money, I would buy a big house." },
+        { de: "Als ich in Deutschland ankam, konnte ich kein Deutsch sprechen.", en: "When I arrived in Germany, I couldn't speak German." },
+        { de: "Die Wohnung, in der meine Eltern wohnen, hat einen schönen Garten.", en: "The apartment in which my parents live has a beautiful garden." },
+        { de: "Wenn das Wetter morgen schön wäre, würden wir an den See fahren.", en: "If the weather were nice tomorrow, we would go to the lake." },
+        { de: "Das Restaurant, in dem wir gestern gegessen haben, wird von einem italienischen Koch geleitet.", en: "The restaurant in which we ate yesterday is run by an Italian chef." },
+        { de: "Als ich ein Kind war, hat meine Großmutter mir jeden Abend Geschichten erzählt.", en: "When I was a child, my grandmother told me stories every evening." },
+        { de: "Der Mann, der neben mir im Büro sitzt, spricht fünf Sprachen.", en: "The man who sits next to me in the office speaks five languages." },
+        { de: "Wenn ich du wäre, würde ich mehr Obst und Gemüse essen.", en: "If I were you, I would eat more fruit and vegetables." },
+        { de: "Die Stadt, in der ich aufgewachsen bin, hat sich sehr verändert.", en: "The city in which I grew up has changed a lot." },
+        { de: "Könnten Sie mir bitte den Weg zum Krankenhaus zeigen?", en: "Could you please show me the way to the hospital?" },
+        { de: "Als mein Bruder seine Prüfung bestanden hat, haben wir zusammen gefeiert.", en: "When my brother passed his exam, we celebrated together." },
+        { de: "Die Lehrerin, bei der ich Deutsch lerne, kommt aus Österreich.", en: "The teacher with whom I learn German comes from Austria." },
+        { de: "Wenn ich mehr Zeit hätte, würde ich jeden Tag ins Fitnessstudio gehen.", en: "If I had more time, I would go to the gym every day." },
+        { de: "Das Buch, das mein Vater mir geschenkt hat, ist sehr spannend.", en: "The book that my father gave me is very exciting." },
+        { de: "Wenn du Hilfe brauchst, kannst du mich jederzeit anrufen.", en: "If you need help, you can call me anytime." },
+        { de: "Die Nachbarin, deren Hund immer bellt, ist nicht zu Hause.", en: "The neighbor whose dog always barks is not at home." },
+        { de: "Als wir in den Urlaub gefahren sind, hat es die ganze Zeit geregnet.", en: "When we went on vacation, it rained the whole time." },
+        { de: "Ich wünschte, ich könnte besser Klavier spielen.", en: "I wish I could play piano better." },
+        { de: "Der Film, über den alle sprechen, handelt von einer Familie in Berlin.", en: "The movie everyone talks about is about a family in Berlin." },
+    ];
+
+    const b2_vocab_complex = [
+        // Advanced structures using rich vocabulary
+        { de: "Obwohl er den ganzen Tag gearbeitet hatte, bereitete er das Abendessen für seine Familie vor.", en: "Although he had worked all day, he prepared dinner for his family." },
+        { de: "Nachdem die Kinder eingeschlafen waren, lasen die Eltern gemütlich ihre Bücher.", en: "After the children had fallen asleep, the parents comfortably read their books." },
+        { de: "Je mehr man über die deutsche Kultur lernt, desto besser versteht man die Sprache.", en: "The more one learns about German culture, the better one understands the language." },
+        { de: "Anstatt den ganzen Tag fernzusehen, sollte man lieber spazieren gehen.", en: "Instead of watching TV all day, one should rather go for a walk." },
+        { de: "Das Erlernen einer Fremdsprache erfordert sowohl Geduld als auch Ausdauer.", en: "Learning a foreign language requires both patience and perseverance." },
+        { de: "Obwohl die Wohnung teuer war, entschieden wir uns dafür, weil sie einen Garten hat.", en: "Although the apartment was expensive, we decided on it because it has a garden." },
+        { de: "Bevor man eine Entscheidung trifft, sollte man alle Möglichkeiten sorgfältig abwägen.", en: "Before making a decision, one should carefully consider all possibilities." },
+        { de: "Er hat sich die Haare schneiden lassen, bevor er zu dem Vorstellungsgespräch gegangen ist.", en: "He had his hair cut before he went to the job interview." },
+        { de: "Das Schönste an der Reise war, dass wir so viele interessante Menschen kennengelernt haben.", en: "The most beautiful thing about the trip was that we met so many interesting people." },
+        { de: "Während die Mutter das Essen vorbereitete, halfen die Kinder beim Tischdecken.", en: "While the mother prepared the food, the children helped set the table." },
+        { de: "Seitdem er Deutsch lernt, versteht er die Nachrichten im Fernsehen viel besser.", en: "Since he has been learning German, he understands the news on TV much better." },
+        { de: "Weder das schlechte Wetter noch die lange Fahrt konnten uns davon abhalten, den Ausflug zu machen.", en: "Neither the bad weather nor the long drive could prevent us from making the trip." },
+        { de: "Er berichtet, er habe bei seiner Großmutter auf dem Land die schönsten Ferien verbracht.", en: "He reports he spent the most beautiful holidays at his grandmother's in the countryside." },
+        { de: "Nicht nur das Sprechen, sondern auch das Schreiben auf Deutsch macht mir inzwischen Spaß.", en: "Not only speaking but also writing in German is fun for me now." },
+        { de: "Um eine Sprache fließend zu sprechen, muss man sich trauen, Fehler zu machen.", en: "In order to speak a language fluently, one must dare to make mistakes." },
+        { de: "Sobald ich meine Prüfung bestanden habe, werde ich eine Reise nach Deutschland planen.", en: "As soon as I have passed my exam, I will plan a trip to Germany." },
+        { de: "Er hätte seine Großeltern öfter besuchen sollen, als sie noch gelebt haben.", en: "He should have visited his grandparents more often when they were still alive." },
+        { de: "Laut dem Bericht sei die Arbeitslosigkeit in der Stadt deutlich gesunken.", en: "According to the report, unemployment in the city has decreased significantly." },
+        { de: "Das Wichtigste beim Deutschlernen ist, dass man jeden Tag ein bisschen übt.", en: "The most important thing when learning German is that you practice a little every day." },
+        { de: "Solange man motiviert bleibt und regelmäßig übt, wird man Fortschritte machen.", en: "As long as one stays motivated and practices regularly, one will make progress." },
+    ];
+
     // ========== GENERATORS PER SECTION ==========
     const generators = {
 
         // ====== A1 ======
         "basic_word_order": function () {
-            const allSentences = [...a1_basic_word_order, ...a1_basic_extra];
+            const allSentences = [...a1_basic_word_order, ...a1_basic_extra, ...a1_vocab_complex];
             const s = pick(allSentences);
             const words = s.de.replace(/[.!?]/g, "").split(" ").filter(w => w);
             return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Subject + Verb + Object (verb in 2nd position)" };
@@ -1459,7 +1558,8 @@ const SentenceGenerator = (function () {
         },
 
         "connectors_weil_dass": function () {
-            const s = pick(a2_connectors_weil_dass);
+            const allSentences = [...a2_connectors_weil_dass, ...a2_vocab_complex];
+            const s = pick(allSentences);
             const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
             const hint = s.de.includes("weil") ? "weil: verb at the END" : "dass: verb at the END";
             return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint };
@@ -1473,7 +1573,8 @@ const SentenceGenerator = (function () {
 
         // ====== B1 ======
         "relative_clauses": function () {
-            const s = pick(b1_relative_clauses);
+            const allSentences = [...b1_relative_clauses, ...b1_vocab_complex];
+            const s = pick(allSentences);
             const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
             return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Relative pronoun (der/die/das/den/dem) + verb at end" };
         },
@@ -1499,7 +1600,8 @@ const SentenceGenerator = (function () {
 
         // ====== B2 ======
         "advanced_connectors": function () {
-            const s = pick(b2_advanced_connectors);
+            const allSentences = [...b2_advanced_connectors, ...b2_vocab_complex];
+            const s = pick(allSentences);
             const words = s.de.replace(/[.,!?]/g, "").split(" ").filter(w => w);
             return { prompt: s.en, answer: s.de, words: shuffleArray(words), hint: "Complex connectors: obwohl, trotzdem, deshalb, falls, bevor, nachdem, während" };
         },

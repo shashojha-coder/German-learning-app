@@ -390,12 +390,6 @@ input { font-family: inherit; outline: none; }
 .exercise-card.correct { border-color: var(--success-color); background: var(--success-bg); }
 .exercise-card.incorrect { border-color: var(--error-color); }
 .exercise-number { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; margin-bottom: 0.5rem; }
-.exercise-prompt { margin-bottom: 1.5rem; text-align: center; }
-.prompt-label { 
-    font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;
-    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;
-}
-.prompt-text { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
 
 /* Word Bank */
 .word-bank { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; justify-content: center; }
@@ -444,6 +438,56 @@ input { font-family: inherit; outline: none; }
 }
 .exercise-feedback.correct { background: var(--success-bg); color: var(--success-color); }
 .exercise-feedback.incorrect { background: var(--error-bg); color: var(--error-color); }
+
+/* ===== UNLIMITED PRACTICE ===== */
+.unlimited-practice {
+    background: var(--bg-secondary); border-radius: 20px; padding: 2rem;
+    box-shadow: var(--card-shadow); border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+.unlimited-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+}
+.unlimited-header h3 {
+    font-size: 1.3rem; font-weight: 800; color: var(--text-primary);
+}
+.unlimited-stats {
+    display: flex; gap: 0.6rem; flex-wrap: wrap;
+}
+.stat-badge {
+    padding: 0.35rem 0.9rem; border-radius: 20px;
+    font-size: 0.85rem; font-weight: 700;
+    border: 1px solid var(--border-color);
+}
+.correct-badge { background: var(--success-bg); color: var(--success-color); }
+.wrong-badge { background: var(--error-bg); color: var(--error-color); }
+.total-badge { background: var(--bg-tertiary); color: var(--text-secondary); }
+.unlimited-card {
+    background: var(--bg-tertiary); border-radius: 18px; padding: 2rem;
+    border: 1px solid var(--border-color); transition: all 0.3s ease;
+}
+.unlimited-card.correct { border-color: var(--success-color); background: var(--success-bg); }
+.unlimited-card.incorrect { border-color: var(--error-color); }
+
+/* ===== ENHANCED PROMPT TEXT ===== */
+.exercise-prompt {
+    margin-bottom: 1.5rem; text-align: center;
+    background: var(--bg-secondary); border-radius: 14px;
+    padding: 1.2rem 1.5rem; border: 2px solid var(--border-color);
+}
+.prompt-label {
+    font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+}
+.prompt-text {
+    font-size: 1.5rem; font-weight: 800;
+    color: #1e293b;
+    display: block; line-height: 1.5;
+}
+[data-theme="dark"] .prompt-text {
+    color: #f8fafc;
+}
 
 /* ===== PROGRESS BAR ===== */
 .section-score {
@@ -506,116 +550,6 @@ input { font-family: inherit; outline: none; }
 
 /* ===== SELECTION ===== */
 ::selection { background: #667eea; color: #fff; }
-
-/* ===== UNLIMITED PRACTICE ===== */
-.unlimited-practice {
-    background: var(--bg-secondary); border-radius: 20px;
-    padding: 2rem; box-shadow: var(--card-shadow);
-    border: 1px solid var(--border-color);
-}
-.unlimited-header {
-    display: flex; justify-content: space-between; align-items: center;
-    flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
-}
-.unlimited-header h3, .unlimited-header h4 {
-    font-size: 1.4rem; font-weight: 800; color: var(--text-primary);
-}
-.unlimited-stats {
-    display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;
-}
-.stat-badge {
-    display: inline-block; padding: 0.4rem 1rem;
-    border-radius: 20px; font-size: 0.85rem; font-weight: 700;
-}
-.stat-badge.correct-badge { background: var(--success-bg); color: var(--success-color); }
-.stat-badge.wrong-badge { background: var(--error-bg); color: var(--error-color); }
-.stat-badge.total-badge { background: var(--bg-tertiary); color: var(--text-secondary); }
-
-.unlimited-card {
-    background: var(--bg-tertiary); border-radius: 18px;
-    padding: 2rem; margin-bottom: 1.5rem;
-}
-.stat-badge.total-badge { background: #e0e7ff; color: #3730a3; }
-
-.unlimited-card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    border: 1px solid #e5e7eb;
-    margin-bottom: 1rem;
-    transition: border-color 0.3s;
-}
-.unlimited-card.correct { border-color: #34d399; background: #f0fdf4; }
-.unlimited-card.incorrect { border-color: #f87171; background: #fef2f2; }
-
-.unlimited-card .prompt {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 0.8rem;
-}
-.unlimited-card .word-bank {
-    margin-bottom: 0.8rem;
-}
-.unlimited-card .answer-area {
-    min-height: 48px;
-    background: #f8fafc;
-    border: 2px dashed #cbd5e1;
-    border-radius: 10px;
-    padding: 0.6rem;
-    margin-bottom: 0.8rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
-}
-.unlimited-card .sentence-input {
-    width: 100%;
-    padding: 0.6rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    margin-bottom: 0.6rem;
-    transition: border-color 0.2s;
-}
-.unlimited-card .sentence-input:focus {
-    outline: none;
-    border-color: #818cf8;
-}
-.unlimited-card .hint-text {
-    display: none;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.8rem;
-    background: #eff6ff;
-    border-radius: 8px;
-    color: #1e40af;
-    font-size: 0.9rem;
-}
-
-.unlimited-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-}
-.unlimited-actions .btn {
-    padding: 0.5rem 1.2rem;
-    border-radius: 10px;
-    border: none;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.btn-check { background: #4f46e5; color: #fff; }
-.btn-check:hover { background: #4338ca; }
-.btn-next { background: #10b981; color: #fff; }
-.btn-next:hover { background: #059669; }
-.btn-reveal { background: #f59e0b; color: #fff; }
-.btn-reveal:hover { background: #d97706; }
-.btn-hint { background: #e0e7ff; color: #4338ca; }
-.btn-hint:hover { background: #c7d2fe; }
 
 /* ===== LANDING PAGE ===== */
 .words-background {

@@ -9,12 +9,16 @@ import os
 
 app = Flask(__name__)
 
-# Load learning data
+# Load learning data (cached in memory)
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "content.json")
+_cached_data = None
 
 def load_data():
-    with open(DATA_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+    global _cached_data
+    if _cached_data is None:
+        with open(DATA_PATH, "r", encoding="utf-8") as f:
+            _cached_data = json.load(f)
+    return _cached_data
 
 
 @app.route("/")
@@ -44,9 +48,11 @@ def sentences(level):
 @app.route("/api/check-sentence", methods=["POST"])
 def check_sentence():
     """API endpoint to check sentence answers."""
-    payload = request.get_json()
-    user_answer = payload.get("answer", "").strip().lower()
-    correct_answer = payload.get("correct", "").strip().lower()
+    payload = request.get_json(silent=True)
+    if not payload:
+        return jsonify({"error": "Invalid request"}), 400
+    user_answer = str(payload.get("answer", ""))[:500].strip().lower()
+    correct_answer = str(payload.get("correct", ""))[:500].strip().lower()
     # Allow minor punctuation differences
     user_clean = user_answer.rstrip(".!?").strip()
     correct_clean = correct_answer.rstrip(".!?").strip()
@@ -56,4 +62,5 @@ def check_sentence():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    app.run(debug=True, host="0.0.0.0", port=port)
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(debug=debug, host="0.0.0.0", port=port)
