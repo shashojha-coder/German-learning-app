@@ -25,7 +25,7 @@
 
 <!-- Vocab content -->
 {% set sec = level.vocab_sections[0] %}
-<div class="vocab-section tab-content active" id="tab-{{ sec.id }}">
+<div class="vocab-section" id="tab-{{ sec.id }}">
     <div class="section-header">
         <h2 id="vocab-label-{{ sec.id }}">{{ sec.title }}</h2>
         <div class="section-controls" role="group" aria-label="Vocab controls">
@@ -40,7 +40,7 @@
             <div class="vocab-card-inner">
                 <div class="vocab-front">
                     <span class="vocab-de">{{ word.de }}</span>
-                    <button class="audio-btn" aria-label="Play pronunciation" onclick="playAudio('{{ word.de|escapejs }}')">🔊</button>
+                        <button class="audio-btn" aria-label="Play pronunciation" onclick="playAudio({{ word.de|tojson }})">🔊</button>
                     <span class="vocab-hint">Click to reveal</span>
                 </div>
                 <div class="vocab-back">
