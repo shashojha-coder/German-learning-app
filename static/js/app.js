@@ -278,17 +278,7 @@ function checkQuiz(sectionId) {
     const input = document.getElementById('quizInput-' + sectionId).value.trim().toLowerCase();
     const correct = state.words[state.index].en.toLowerCase();
     const feedback = document.getElementById('quizFeedback-' + sectionId);
-    state.total++;
-    if (input === correct || correct.includes(input) && input.length > 2) {
-        state.correct++;
-        feedback.textContent = '✅ Correct!';
-        feedback.style.color = '#4CAF50';
-    } else {
-        feedback.textContent = `❌ Answer: ${state.words[state.index].en}`;
-        feedback.style.color = '#f44336';
-    }
-    document.getElementById('quizScore-' + sectionId).textContent =
-        `Score: ${state.correct} / ${state.total}`;
+}
     state.total++;
     if (input === correct || (correct.includes(input) && input.length > 2)) {
         state.correct++;
@@ -314,15 +304,6 @@ function checkQuiz(sectionId) {
         state.index++;
         setTimeout(() => showQuizWord(sectionId), 1200);
     }
-        for (let i = tiles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            bank.appendChild(tiles[j]);
-            tiles.splice(j, 1);
-        }
-        // Final Fisher-Yates on DOM
-        const shuffled = Array.from(bank.children).sort(() => Math.random() - 0.5);
-        shuffled.forEach(el => bank.appendChild(el));
-    });
 
     // Restore unlimited progress stats on load
     if (typeof sentenceData !== 'undefined') {
