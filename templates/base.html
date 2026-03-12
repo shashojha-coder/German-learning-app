@@ -53,3 +53,7 @@
     </div>
 
     <div id="globalError" class="global-error" style="display:none;" role="alert"></div>
+
+    {% block content %}{% endblock %}
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
