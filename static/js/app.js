@@ -116,20 +116,7 @@ function updateThemeIcon(theme) {
         btn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 }
-    if (!unlimitedState[sectionId]) {
-        const stats = loadUnlimitedProgress(sectionId);
-        unlimitedState[sectionId] = {
-            exercise: exercise,
-            answered: false,
-            correct: stats.correct,
-            wrong: stats.wrong,
-            total: stats.total
-        };
-    } else {
-        unlimitedState[sectionId].exercise = exercise;
-        unlimitedState[sectionId].answered = false;
-    }
-
+ 
 // Initialize theme on page load
 (function initTheme() {
     const savedTheme = localStorage.getItem('theme');
