@@ -1,3 +1,60 @@
+// ===== ADJECTIVE COMPARATIVE & SUPERLATIVE EXERCISES =====
+const adjectiveList = [
+    // Add more adjectives as needed
+    { base: 'groß', comparative: 'größer', superlative: 'am größten', en: 'big' },
+    { base: 'klein', comparative: 'kleiner', superlative: 'am kleinsten', en: 'small' },
+    { base: 'schnell', comparative: 'schneller', superlative: 'am schnellsten', en: 'fast' },
+    { base: 'langsam', comparative: 'langsamer', superlative: 'am langsamsten', en: 'slow' },
+    { base: 'alt', comparative: 'älter', superlative: 'am ältesten', en: 'old' },
+    { base: 'jung', comparative: 'jünger', superlative: 'am jüngsten', en: 'young' },
+    { base: 'gut', comparative: 'besser', superlative: 'am besten', en: 'good' },
+    { base: 'schlecht', comparative: 'schlechter', superlative: 'am schlechtesten', en: 'bad' },
+    { base: 'teuer', comparative: 'teurer', superlative: 'am teuersten', en: 'expensive' },
+    { base: 'billig', comparative: 'billiger', superlative: 'am billigsten', en: 'cheap' },
+    { base: 'schön', comparative: 'schöner', superlative: 'am schönsten', en: 'beautiful' },
+    { base: 'leicht', comparative: 'leichter', superlative: 'am leichtesten', en: 'easy' },
+    { base: 'schwer', comparative: 'schwerer', superlative: 'am schwersten', en: 'difficult' },
+];
+
+let adjExerciseState = null;
+
+function startAdjectiveExercise() {
+    // Pick a random adjective and a random form to test
+    const adj = adjectiveList[Math.floor(Math.random() * adjectiveList.length)];
+    const forms = ['comparative', 'superlative'];
+    const form = forms[Math.floor(Math.random() * forms.length)];
+    adjExerciseState = { adj, form };
+    let prompt = '';
+    if (form === 'comparative') {
+        prompt = `What is the comparative of <b>${adj.base}</b> (${adj.en})?`;
+    } else {
+        prompt = `What is the superlative of <b>${adj.base}</b> (${adj.en})?`;
+    }
+    const html = `
+        <div class="adj-ex-prompt">${prompt}</div>
+        <input type="text" id="adj-ex-input" class="quiz-input" placeholder="Type your answer...">
+        <button class="btn btn-primary" onclick="checkAdjectiveExercise()">Check</button>
+        <div id="adj-ex-feedback"></div>
+    `;
+    document.getElementById('adjective-exercise-container').innerHTML = html;
+    document.getElementById('adj-ex-input').focus();
+}
+
+function checkAdjectiveExercise() {
+    if (!adjExerciseState) return;
+    const userInput = document.getElementById('adj-ex-input').value.trim().toLowerCase();
+    const correct = adjExerciseState.adj[adjExerciseState.form].toLowerCase();
+    const feedback = document.getElementById('adj-ex-feedback');
+    if (userInput === correct) {
+        feedback.textContent = '✅ Correct!';
+        feedback.style.color = '#4CAF50';
+    } else {
+        feedback.textContent = `❌ Correct answer: ${correct}`;
+        feedback.style.color = '#f44336';
+    }
+    // Optionally, auto-next after a delay
+    setTimeout(startAdjectiveExercise, 1500);
+}
 // ===== GLOBAL ERROR BANNER =====
 function showError(msg) {
     const el = document.getElementById('globalError');

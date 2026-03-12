@@ -34,6 +34,17 @@ def vocab(level):
     level_data = next((l for l in data["levels"] if l["id"] == level), None)
     if not level_data:
         return "Level not found", 404
+    # Merge all vocab sections into one
+    merged_words = []
+    for sec in level_data.get("vocab_sections", []):
+        merged_words.extend(sec.get("words", []))
+    merged_section = {
+        "id": "all_vocab",
+        "title": "All Vocabulary",
+        "words": merged_words
+    }
+    # For adjective exercises, pass a flag or extra data if needed (handled in template/js)
+    level_data["vocab_sections"] = [merged_section]
     return render_template("vocab.html", level=level_data, all_levels=data["levels"])
 
 

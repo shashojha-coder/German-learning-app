@@ -21,20 +21,11 @@
     </div>
 </div>
 
-<!-- Section tabs -->
-<div class="section-tabs">
-    {% for sec in level.vocab_sections %}
-    <button class="tab-btn {% if loop.first %}active{% endif %}" 
-            onclick="switchTab('{{ sec.id }}', this)"
-            style="--tab-color: {{ level.color }};">
-        {{ sec.title }}
-    </button>
-    {% endfor %}
-</div>
+<!-- Only one merged vocab section, so no tabs needed -->
 
 <!-- Vocab content -->
-{% for sec in level.vocab_sections %}
-<div class="vocab-section tab-content {% if loop.first %}active{% endif %}" id="tab-{{ sec.id }}">
+{% set sec = level.vocab_sections[0] %}
+<div class="vocab-section tab-content active" id="tab-{{ sec.id }}">
     <div class="section-header">
         <h2 id="vocab-label-{{ sec.id }}">{{ sec.title }}</h2>
         <div class="section-controls" role="group" aria-label="Vocab controls">
@@ -71,7 +62,7 @@
         <div class="quiz-container" id="quiz-{{ sec.id }}" role="region" aria-labelledby="quiz-label-{{ sec.id }}">
             <div class="quiz-card">
                 <div class="quiz-word" id="quizWord-{{ sec.id }}" aria-live="polite">—</div>
-                                <button class="audio-btn" aria-label="Play pronunciation" onclick="playQuizAudio('{{ sec.id }}')">🔊</button>
+                <button class="audio-btn" aria-label="Play pronunciation" onclick="playQuizAudio('{{ sec.id }}')">🔊</button>
                 <input type="text" class="quiz-input" id="quizInput-{{ sec.id }}" 
                        placeholder="Type the English meaning..." 
                        aria-label="Type the English meaning"
@@ -88,8 +79,15 @@
         <button class="btn btn-primary" style="background: {{ level.color }};" 
                 onclick="startQuiz('{{ sec.id }}')">Start Quiz</button>
     </div>
+
+    <!-- Adjective Comparative & Superlative Exercises (UI placeholder) -->
+    <div class="adjective-exercises">
+        <h3>Adjective Comparative & Superlative Practice</h3>
+        <p>Practice forming and using comparatives and superlatives for German adjectives.</p>
+        <div id="adjective-exercise-container"></div>
+        <button class="btn btn-secondary" onclick="startAdjectiveExercise()">Start Adjective Exercise</button>
+    </div>
 </div>
-{% endfor %}
 
 <!-- Data for JS -->
 <script>
