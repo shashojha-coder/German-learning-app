@@ -116,7 +116,7 @@ function updateThemeIcon(theme) {
         btn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 }
- 
+// Initialize theme on page load
 // Initialize theme on page load
 (function initTheme() {
     const savedTheme = localStorage.getItem('theme');
