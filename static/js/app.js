@@ -101,67 +101,6 @@ const StorageManager = {
     }
 };
 
-// Updated save/load functions
-function saveUnlimitedProgress(sectionId) {
-    try {
-        const state = unlimitedState[sectionId];
-        if (!state) return;
-        StorageManager.setItem('unlimited_' + sectionId, JSON.stringify({
-            correct: state.correct,
-            wrong: state.wrong,
-            total: state.total
-        }));
-    } catch (e) {
-        console.error('Could not save progress:', e);
-        showError('Progress may not be saved.');
-    }
-}
-
-function loadUnlimitedProgress(sectionId) {
-    try {
-        const raw = StorageManager.getItem('unlimited_' + sectionId);
-        if (!raw) return { correct: 0, wrong: 0, total: 0 };
-        const obj = JSON.parse(raw);
-        return {
-            correct: obj.correct || 0,
-            wrong: obj.wrong || 0,
-            total: obj.total || 0
-        };
-    } catch (e) {
-        return { correct: 0, wrong: 0, total: 0 };
-    }
-}
-
-function saveQuizProgress(sectionId) {
-    try {
-        const state = quizState[sectionId];
-        if (!state) return;
-        StorageManager.setItem('quiz_' + sectionId, JSON.stringify({
-            index: state.index,
-            correct: state.correct,
-            total: state.total
-        }));
-    } catch (e) {
-        console.error('Could not save quiz progress:', e);
-        showError('Quiz progress may not be saved.');
-    }
-}
-
-function loadQuizProgress(sectionId) {
-    try {
-        const raw = StorageManager.getItem('quiz_' + sectionId);
-        if (!raw) return { index: 0, correct: 0, total: 0 };
-        const obj = JSON.parse(raw);
-        return {
-            index: obj.index || 0,
-            correct: obj.correct || 0,
-            total: obj.total || 0
-        };
-    } catch (e) {
-        return { index: 0, correct: 0, total: 0 };
-    }
-}
-
 // ===== THEME INITIALIZATION =====
 (function initTheme() {
     const savedTheme = localStorage.getItem('theme');
@@ -234,25 +173,6 @@ function nextQuiz(sectionId) {
     saveQuizProgress(sectionId);
     displayQuizWord(sectionId);
 }
-// ===== ADJECTIVE COMPARATIVE & SUPERLATIVE EXERCISES =====
-const adjectiveList = [
-    // Add more adjectives as needed
-    { base: 'groß', comparative: 'größer', superlative: 'am größten', en: 'big' },
-    { base: 'klein', comparative: 'kleiner', superlative: 'am kleinsten', en: 'small' },
-    { base: 'schnell', comparative: 'schneller', superlative: 'am schnellsten', en: 'fast' },
-    { base: 'langsam', comparative: 'langsamer', superlative: 'am langsamsten', en: 'slow' },
-    { base: 'alt', comparative: 'älter', superlative: 'am ältesten', en: 'old' },
-    { base: 'jung', comparative: 'jünger', superlative: 'am jüngsten', en: 'young' },
-    { base: 'gut', comparative: 'besser', superlative: 'am besten', en: 'good' },
-    { base: 'schlecht', comparative: 'schlechter', superlative: 'am schlechtesten', en: 'bad' },
-    { base: 'teuer', comparative: 'teurer', superlative: 'am teuersten', en: 'expensive' },
-    { base: 'billig', comparative: 'billiger', superlative: 'am billigsten', en: 'cheap' },
-    { base: 'schön', comparative: 'schöner', superlative: 'am schönsten', en: 'beautiful' },
-    { base: 'leicht', comparative: 'leichter', superlative: 'am leichtesten', en: 'easy' },
-    { base: 'schwer', comparative: 'schwerer', superlative: 'am schwersten', en: 'difficult' },
-];
-
-let adjExerciseState = null;
 
 function startAdjectiveExercise() {
     // Pick a random adjective and a random form to test
@@ -450,6 +370,7 @@ function shuffleCards(sectionId) {
 }
 
     // Restore unlimited progress stats on load
+  document.addEventListener('DOMContentLoaded', function() {
     if (typeof sentenceData !== 'undefined') {
         sentenceData.forEach(function(sec) {
             const stats = loadUnlimitedProgress(sec.id);
@@ -464,7 +385,6 @@ function shuffleCards(sectionId) {
         });
     }
 
-    // Restore quiz progress stats on load
     if (typeof vocabData !== 'undefined') {
         vocabData.forEach(function(sec) {
             const stats = loadQuizProgress(sec.id);
@@ -575,7 +495,6 @@ function updateProgress(sectionId) {
 }
 
 /* ===== UNLIMITED PRACTICE MODE ===== */
-const unlimitedState = {};
 
 function nextUnlimited(sectionId) {
     if (typeof SentenceGenerator === 'undefined') return;
