@@ -409,18 +409,6 @@ function updateThemeIcon(theme) {
         btn.textContent = theme === 'dark' ? '☀️' : '🌙';
     }
 }
-// Initialize theme on page load
-// Initialize theme on page load
-(function initTheme() {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
-    if (theme === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    }
-    // Update icon after DOM is ready
-    document.addEventListener('DOMContentLoaded', () => updateThemeIcon(theme));
-})();
 
 /* ===== TAB SWITCHING ===== */
 function switchTab(tabId, btn) {
@@ -460,86 +448,6 @@ function shuffleCards(sectionId) {
     const shuffled = Array.from(grid.children).sort(() => Math.random() - 0.5);
     shuffled.forEach(card => grid.appendChild(card));
 }
-
-/* ===== VOCAB QUIZ ===== */
-const quizState = {};
-
-function startQuiz(sectionId) {
-    const section = vocabData.find(s => s.id === sectionId);
-    if (!section) return;
-    const words = [...section.words].sort(() => Math.random() - 0.5);
-    quizState[sectionId] = {
-        words,
-        index: 0,
-        correct: 0,
-        total: 0,
-        missed: [], // store missed word indices
-        streak: 0 // correct answer streak
-    };
-    document.getElementById('quiz-' + sectionId).classList.add('active');
-    showQuizWord(sectionId);
-}
-
-function showQuizWord(sectionId) {
-    const state = quizState[sectionId];
-    // If missed words exist, prioritize them
-    if (state.missed && state.missed.length > 0) {
-        state.index = state.missed.shift();
-    }
-    if (!state || state.index >= state.words.length) {
-        document.getElementById('quizWord-' + sectionId).textContent =
-            `Done! ${state.correct}/${state.total} correct 🎉`;
-        document.getElementById('quizInput-' + sectionId).style.display = 'none';
-        return;
-    }
-    document.getElementById('quizWord-' + sectionId).textContent = state.words[state.index].de;
-    document.getElementById('quizInput-' + sectionId).value = '';
-    document.getElementById('quizInput-' + sectionId).style.display = '';
-    document.getElementById('quizInput-' + sectionId).focus();
-    document.getElementById('quizFeedback-' + sectionId).textContent = '';
-    // If streak >= 3, hide placeholder to increase challenge
-    if (state.streak >= 3) {
-        document.getElementById('quizInput-' + sectionId).placeholder = '';
-    } else {
-        document.getElementById('quizInput-' + sectionId).placeholder = 'Type the English meaning...';
-    }
-}
-
-function checkQuiz(sectionId) {
-    const state = quizState[sectionId];
-    if (!state || state.index >= state.words.length) {
-        showError('Quiz state error. Please restart the quiz.');
-        return;
-    }
-    const input = document.getElementById('quizInput-' + sectionId).value.trim().toLowerCase();
-    const correct = state.words[state.index].en.toLowerCase();
-    const feedback = document.getElementById('quizFeedback-' + sectionId);
-}
-    state.total++;
-    if (input === correct || (correct.includes(input) && input.length > 2)) {
-        state.correct++;
-        state.streak = (state.streak || 0) + 1;
-        feedback.textContent = '✅ Correct!';
-        feedback.style.color = '#4CAF50';
-    } else {
-        feedback.textContent = `❌ Answer: ${state.words[state.index].en}`;
-        feedback.style.color = '#f44336';
-        // Add missed index to repeat soon
-        if (!state.missed) state.missed = [];
-        state.missed.push(state.index);
-        state.streak = 0;
-    }
-    document.getElementById('quizScore-' + sectionId).textContent =
-        `Score: ${state.correct} / ${state.total}`;
-    // Save progress
-    saveQuizProgress(sectionId);
-    // Next: if missed, repeat soon; else, go to next
-    if (state.missed && state.missed.length > 0) {
-        setTimeout(() => showQuizWord(sectionId), 1200);
-    } else {
-        state.index++;
-        setTimeout(() => showQuizWord(sectionId), 1200);
-    }
 
     // Restore unlimited progress stats on load
     if (typeof sentenceData !== 'undefined') {
