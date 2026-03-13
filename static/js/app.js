@@ -254,60 +254,7 @@ function playSentenceAudio(sectionId) {
     const sentence = state.exercise?.answer;
     if (sentence) playAudio(sentence);
 }
-// ====== PERSISTENT PROGRESS HELPERS ======
-function saveUnlimitedProgress(sectionId) {
-    try {
-        const state = unlimitedState[sectionId];
-        if (!state) return;
-        localStorage.setItem('unlimited_' + sectionId, JSON.stringify({
-            correct: state.correct,
-            wrong: state.wrong,
-            total: state.total
-        }));
-    } catch (e) {
-        showError('Could not save progress.');
-    }
-}
 
-function loadUnlimitedProgress(sectionId) {
-    try {
-        const raw = localStorage.getItem('unlimited_' + sectionId);
-        if (!raw) return { correct: 0, wrong: 0, total: 0 };
-        const obj = JSON.parse(raw);
-        return {
-            correct: obj.correct || 0,
-            wrong: obj.wrong || 0,
-            total: obj.total || 0
-        };
-    } catch (e) { return { correct: 0, wrong: 0, total: 0 }; }
-}
-
-function saveQuizProgress(sectionId) {
-    try {
-        const state = quizState[sectionId];
-        if (!state) return;
-        localStorage.setItem('quiz_' + sectionId, JSON.stringify({
-            index: state.index,
-            correct: state.correct,
-            total: state.total
-        }));
-    } catch (e) {
-        showError('Could not save quiz progress.');
-    }
-}
-
-function loadQuizProgress(sectionId) {
-    try {
-        const raw = localStorage.getItem('quiz_' + sectionId);
-        if (!raw) return { index: 0, correct: 0, total: 0 };
-        const obj = JSON.parse(raw);
-        return {
-            index: obj.index || 0,
-            correct: obj.correct || 0,
-            total: obj.total || 0
-        };
-    } catch (e) { return { index: 0, correct: 0, total: 0 }; }
-}
 /* ===== MOBILE MENU ===== */
 function toggleMobileMenu() {
     document.getElementById('mobileMenu').classList.toggle('open');
