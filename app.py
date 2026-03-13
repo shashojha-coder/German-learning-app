@@ -17,7 +17,7 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key')
 DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "content.json")
 _cached_data = None
 
-def load_datita():
+def load_data():
     global _cached_data
     if _cached_data is None:
         with open(DATA_PATH, "r", encoding="utf-8") as f:
