@@ -1,3 +1,239 @@
+// ===== GLOBAL STATE INITIALIZATION =====
+const adjectiveList = [
+    { base: 'groß', comparative: 'größer', superlative: 'am größten', en: 'big' },
+    { base: 'klein', comparative: 'kleiner', superlative: 'am kleinsten', en: 'small' },
+    { base: 'schnell', comparative: 'schneller', superlative: 'am schnellsten', en: 'fast' },
+    { base: 'langsam', comparative: 'langsamer', superlative: 'am langsamsten', en: 'slow' },
+    { base: 'alt', comparative: 'älter', superlative: 'am ältesten', en: 'old' },
+    { base: 'jung', comparative: 'jünger', superlative: 'am jüngsten', en: 'young' },
+    { base: 'gut', comparative: 'besser', superlative: 'am besten', en: 'good' },
+    { base: 'schlecht', comparative: 'schlechter', superlative: 'am schlechtesten', en: 'bad' },
+    { base: 'teuer', comparative: 'teurer', superlative: 'am teuersten', en: 'expensive' },
+    { base: 'billig', comparative: 'billiger', superlative: 'am billigsten', en: 'cheap' },
+    { base: 'schön', comparative: 'schöner', superlative: 'am schönsten', en: 'beautiful' },
+    { base: 'leicht', comparative: 'leichter', superlative: 'am leichtesten', en: 'easy' },
+    { base: 'schwer', comparative: 'schwerer', superlative: 'am schwersten', en: 'difficult' },
+];
+
+// Initialize global state objects
+let quizState = {};
+let unlimitedState = {};
+let adjExerciseState = null;
+
+// ID constants - centralized for easy refactoring
+const DOM_IDS = {
+    quizInput: (id) => `quizInput-${id}`,
+    quizWord: (id) => `quizWord-${id}`,
+    quizFeedback: (id) => `quizFeedback-${id}`,
+    quizScore: (id) => `quizScore-${id}`,
+    unlimitedInput: (id) => `uInput-${id}`,
+    unlimitedCard: (id) => `uCard-${id}`,
+    unlimitedFeedback: (id) => `uFeedback-${id}`,
+    unlimitedAnswer: (id) => `uAnswer-${id}`,
+    unlimitedBank: (id) => `uBank-${id}`,
+    unlimitedHint: (id) => `uHint-${id}`,
+    unlimitedCorrect: (id) => `uCorrect-${id}`,
+    unlimitedWrong: (id) => `uWrong-${id}`,
+    unlimitedTotal: (id) => `uTotal-${id}`,
+    unlimitedProgress: (id) => `uProgress-${id}`,
+    unlimitedScoreText: (id) => `uScoreText-${id}`,
+    grid: (id) => `grid-${id}`,
+    tab: (id) => `tab-${id}`,
+    globalError: 'globalError',
+    mobileMenu: 'mobileMenu',
+    themeToggle: '.theme-toggle',
+    adjectiveContainer: 'adjective-exercise-container',
+    adjectiveInput: 'adj-ex-input',
+    adjectiveFeedback: 'adj-ex-feedback',
+    bubbleContainer: 'bubble-container'
+};
+
+// Utility function to escape HTML for XSS prevention
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Storage manager with localStorage fallback
+const StorageManager = {
+    _cache: {},
+    _isLocalStorageAvailable: null,
+    _checkStorage() {
+        if (this._isLocalStorageAvailable !== null) return;
+        try {
+            const test = '__storage_test__';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            this._isLocalStorageAvailable = true;
+        } catch (e) {
+            this._isLocalStorageAvailable = false;
+            console.warn('localStorage unavailable - using in-memory storage');
+        }
+    },
+    setItem(key, value) {
+        this._checkStorage();
+        try {
+            if (this._isLocalStorageAvailable) {
+                localStorage.setItem(key, value);
+            }
+        } catch (e) {
+            console.warn('Could not save to localStorage:', e);
+        }
+        this._cache[key] = value;
+    },
+    getItem(key) {
+        this._checkStorage();
+        try {
+            if (this._isLocalStorageAvailable) {
+                const item = localStorage.getItem(key);
+                if (item !== null) return item;
+            }
+        } catch (e) {
+            console.warn('Could not read from localStorage:', e);
+        }
+        return this._cache[key] || null;
+    }
+};
+
+// Updated save/load functions
+function saveUnlimitedProgress(sectionId) {
+    try {
+        const state = unlimitedState[sectionId];
+        if (!state) return;
+        StorageManager.setItem('unlimited_' + sectionId, JSON.stringify({
+            correct: state.correct,
+            wrong: state.wrong,
+            total: state.total
+        }));
+    } catch (e) {
+        console.error('Could not save progress:', e);
+        showError('Progress may not be saved.');
+    }
+}
+
+function loadUnlimitedProgress(sectionId) {
+    try {
+        const raw = StorageManager.getItem('unlimited_' + sectionId);
+        if (!raw) return { correct: 0, wrong: 0, total: 0 };
+        const obj = JSON.parse(raw);
+        return {
+            correct: obj.correct || 0,
+            wrong: obj.wrong || 0,
+            total: obj.total || 0
+        };
+    } catch (e) {
+        return { correct: 0, wrong: 0, total: 0 };
+    }
+}
+
+function saveQuizProgress(sectionId) {
+    try {
+        const state = quizState[sectionId];
+        if (!state) return;
+        StorageManager.setItem('quiz_' + sectionId, JSON.stringify({
+            index: state.index,
+            correct: state.correct,
+            total: state.total
+        }));
+    } catch (e) {
+        console.error('Could not save quiz progress:', e);
+        showError('Quiz progress may not be saved.');
+    }
+}
+
+function loadQuizProgress(sectionId) {
+    try {
+        const raw = StorageManager.getItem('quiz_' + sectionId);
+        if (!raw) return { index: 0, correct: 0, total: 0 };
+        const obj = JSON.parse(raw);
+        return {
+            index: obj.index || 0,
+            correct: obj.correct || 0,
+            total: obj.total || 0
+        };
+    } catch (e) {
+        return { index: 0, correct: 0, total: 0 };
+    }
+}
+
+// ===== THEME INITIALIZATION =====
+(function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', theme);
+    if (document.readyState !== 'loading') {
+        updateThemeIcon(theme);
+    } else {
+        document.addEventListener('DOMContentLoaded', () => updateThemeIcon(theme));
+    }
+})();
+
+// ===== QUIZ FUNCTIONS =====
+function startQuiz(sectionId) {
+    if (!quizState) quizState = {};
+    if (!vocabData || !vocabData[0]) {
+        showError('No vocabulary data available');
+        return;
+    }
+    const saved = loadQuizProgress(sectionId);
+    quizState[sectionId] = {
+        words: vocabData[0].words || [],
+        index: saved.index || 0,
+        correct: saved.correct || 0,
+        total: saved.total || 0
+    };
+    displayQuizWord(sectionId);
+}
+
+function displayQuizWord(sectionId) {
+    const state = quizState[sectionId];
+    if (!state || state.index >= state.words.length) {
+        document.getElementById(DOM_IDS.quizWord(sectionId)).textContent = 'Quiz Complete!';
+        document.getElementById(DOM_IDS.quizScore(sectionId)).textContent = `Final Score: ${state.correct} / ${state.total}`;
+        return;
+    }
+    const word = state.words[state.index];
+    document.getElementById(DOM_IDS.quizWord(sectionId)).textContent = word.de;
+    document.getElementById(DOM_IDS.quizInput(sectionId)).value = '';
+    document.getElementById(DOM_IDS.quizFeedback(sectionId)).textContent = '';
+    document.getElementById(DOM_IDS.quizScore(sectionId)).textContent = `Score: ${state.correct} / ${state.total}`;
+}
+
+function checkQuiz(sectionId) {
+    const state = quizState[sectionId];
+    if (!state || state.index >= state.words.length) return;
+    const input = document.getElementById(DOM_IDS.quizInput(sectionId));
+    const userAnswer = input.value.trim().toLowerCase();
+    const correctAnswer = state.words[state.index].en.toLowerCase();
+    const feedback = document.getElementById(DOM_IDS.quizFeedback(sectionId));
+    if (userAnswer === correctAnswer) {
+        state.correct++;
+        feedback.textContent = '✅ Correct!';
+        feedback.style.color = '#4CAF50';
+    } else {
+        feedback.innerHTML = '❌ Correct answer: <strong>' + escapeHtml(correctAnswer) + '</strong>';
+        feedback.style.color = '#f44336';
+    }
+    state.total++;
+    state.index++;
+    saveQuizProgress(sectionId);
+    setTimeout(() => displayQuizWord(sectionId), 1500);
+}
+
+function nextQuiz(sectionId) {
+    const state = quizState[sectionId];
+    if (!state) return;
+    state.index++;
+    saveQuizProgress(sectionId);
+    displayQuizWord(sectionId);
+}
 // ===== ADJECTIVE COMPARATIVE & SUPERLATIVE EXERCISES =====
 const adjectiveList = [
     // Add more adjectives as needed
